@@ -8,8 +8,8 @@ package com.fromfinalform.blocks.presentation.model.graphics.renderer.unit
 import android.graphics.RectF
 import android.opengl.GLES20
 import com.fromfinalform.blocks.common.ICloneable
-import com.fromfinalform.blocks.common.clone
 import com.fromfinalform.blocks.common.heightInv
+import com.fromfinalform.blocks.presentation.model.graphics.animation.IGLAnimation
 import com.fromfinalform.blocks.presentation.model.graphics.drawer.ShaderDrawerTypeId
 
 open class RenderItem(
@@ -21,10 +21,14 @@ open class RenderItem(
     override var id: Long = -1L
 
     var x       get()  = itemParams.dstRect.left
-                set(v) { itemParams.dstRect.left = v }
+                set(v) { val dx = v - itemParams.dstRect.left
+                         itemParams.dstRect.left = v
+                         itemParams.dstRect.right += dx }
 
     var y       get()  = itemParams.dstRect.top
-                set(v) { itemParams.dstRect.top = v }
+                set(v) { val dy = itemParams.dstRect.top -  v
+                         itemParams.dstRect.top = v
+                         itemParams.dstRect.bottom -= dy }
 
     var width   get()  = itemParams.dstRect.width()
                 set(v) { itemParams.dstRect.right = x + v }
@@ -57,14 +61,15 @@ open class RenderItem(
     var blendDstRGB: Int? = null;                   private set
     var blendDstAlpha: Int? = null;                 private set
 
+    private val lo = Any()
     var childs: List<RenderItem>? = null;           private set
-    private val childsLo = Any()
+    var animations: List<IGLAnimation>? = null;      private set
 
     val usedBlend get() = usedBlendFactor || usedBlendSeparate
     val usedBlendFactor get() = blendSrc > 0 && blendDst > 0
     val usedBlendSeparate get() = blendSrcRGB != null && blendSrcAlpha != null && blendDstRGB != null && blendDstAlpha != null
 
-    fun translateX(dX: Float): RenderItem { synchronized(childsLo) {
+    fun translateX(dX: Float): RenderItem { synchronized(lo) {
         this.x += dX
         this.childs?.forEach { c -> c.translateX(dX) }
         return this
@@ -75,7 +80,7 @@ open class RenderItem(
         return this
     }
 
-    fun translateY(dY: Float): RenderItem { synchronized(childsLo) {
+    fun translateY(dY: Float): RenderItem { synchronized(lo) {
         this.y -= dY
         this.childs?.forEach { c -> c.translateY(dY) }
         return this
@@ -86,17 +91,28 @@ open class RenderItem(
         return this
     }
 
-    fun addChild(value: RenderItem) { synchronized(childsLo) {
+    fun addChild(value: RenderItem) { synchronized(lo) {
         if(this.childs == null)
             this.childs = ArrayList()
 
         (this.childs as ArrayList).add(value)
     } }
 
-    fun removeChild(id: Long): RenderItem? { synchronized(childsLo) {
+    fun removeChild(id: Long): RenderItem? { synchronized(lo) {
         var item = (this.childs as? ArrayList)?.first { it.id == id }
         val removed = (this.childs as? ArrayList)?.remove(item)
         return if (removed == true) item else null
+    } }
+
+    fun addAnimation(value: IGLAnimation) { synchronized(lo) {
+        if (this.animations == null)
+            this.animations = ArrayList()
+
+        (this.animations as ArrayList).add(value)
+    } }
+
+    fun removeAnimation(value: IGLAnimation) { synchronized(lo) {
+        (this.animations as? ArrayList)?.remove(value)
     } }
 
     fun withId(id: Long): RenderItem {
@@ -104,7 +120,7 @@ open class RenderItem(
         return this
     }
 
-    fun setLayout(x: Float, y: Float, w: Float, h: Float, r: Float) { synchronized(childsLo) {
+    fun setLayout(x: Float, y: Float, w: Float, h: Float, r: Float) { synchronized(lo) {
         this.x = x
         this.y = y
         this.width = w
@@ -170,12 +186,17 @@ open class RenderItem(
         return this
     }
 
-    fun withChilds(items: List<RenderItem>?): RenderItem {
-        this.childs = if(items == null) null else ArrayList(items.map { c -> c.clone() })
+    fun withChilds(values: List<RenderItem>?): RenderItem { synchronized(lo) {
+        this.childs = if(values == null) null else ArrayList(values.map { c -> c.clone() })
         return this
-    }
+    } }
 
-    override fun clone(): RenderItem { synchronized(childsLo) {
+    fun withAnimations(values: List<IGLAnimation>?): RenderItem { synchronized(lo) {
+        this.animations = if (values == null) null else ArrayList(values.map { c -> c.clone() })
+        return this
+    } }
+
+    override fun clone(): RenderItem { synchronized(lo) {
         return RenderItem(itemParams.copy())
             .withTexture(textureId)
             .withColor(color, colorSecondary, colorAngle)

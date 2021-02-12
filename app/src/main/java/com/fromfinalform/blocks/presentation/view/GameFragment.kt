@@ -10,6 +10,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.navigation.NavController
 import androidx.navigation.findNavController
@@ -27,6 +28,7 @@ class GameFragment : MvpAppCompatFragment(), GamePresenter.GameView {
     private lateinit var vgCanvasGroup: ConstraintLayout
     private lateinit var vHGap: View
     private lateinit var glSurface: GLSurfaceView
+    private lateinit var tvStatus: TextView
 
     private var sceneConfigured = false
 
@@ -52,13 +54,17 @@ class GameFragment : MvpAppCompatFragment(), GamePresenter.GameView {
         glSurface.setRenderer(presenter.renderer)
         setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY)
 
+        tvStatus = vRoot.findViewById(R.id.tv_status)
+
         vRoot.findViewById<View>(R.id.btn_start).setOnClickListener {
             //it.findNavController().navigate(GameFragmentDirections.actionGameFragmentToScoreFragment())
             presenter.renderer.start()
+            tvStatus.text = "looping"
         }
 
         vRoot.findViewById<View>(R.id.btn_stop).setOnClickListener {
             presenter.renderer.stop()
+            tvStatus.text = "stopped"
         }
 
         return vRoot

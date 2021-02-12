@@ -76,6 +76,10 @@ class ViewRenderer(clearColor: Long, override var sceneSize: ISize) : IRenderer 
     }
 
     override fun onDrawFrame(gl: GL10?) { try {
+        if (isStarted && frames == 0L) {
+            handler?.onFirstFrame()
+        }
+
         ++frames
 
         val nowTimeMs = System.currentTimeMillis()
@@ -93,11 +97,11 @@ class ViewRenderer(clearColor: Long, override var sceneSize: ISize) : IRenderer 
             else {
                 handler?.onFrame(renderParams, sceneParams)
             }
-        }
 
-        synchronized(renderUnitsLo) {
-            for (ru in renderUnitsSorted)
-                ru.render(this, renderParams, sceneParams)
+            synchronized(renderUnitsLo) {
+                for (ru in renderUnitsSorted)
+                    ru.render(this, renderParams, sceneParams)
+            }
         }
 
         lastFrameTimeMs = nowTimeMs
@@ -119,6 +123,9 @@ class ViewRenderer(clearColor: Long, override var sceneSize: ISize) : IRenderer 
     }
 
     override fun start() {
+        if (isStarted)
+            return
+
         startTime = System.currentTimeMillis()
         lastFrameTimeMs = 0
         frames = 0

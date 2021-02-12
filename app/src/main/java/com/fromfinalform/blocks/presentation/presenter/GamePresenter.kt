@@ -5,6 +5,7 @@
 
 package com.fromfinalform.blocks.presentation.presenter
 
+import android.graphics.PointF
 import android.opengl.GLSurfaceView
 import android.view.Gravity
 import android.view.View
@@ -21,6 +22,8 @@ import com.fromfinalform.blocks.domain.model.game.GameObject
 import com.fromfinalform.blocks.domain.model.game.IGameConfig
 import com.fromfinalform.blocks.presentation.mapper.GraphicsMapper.Companion.mapLayout
 import com.fromfinalform.blocks.presentation.mapper.GraphicsMapper.Companion.toRenderUnit
+import com.fromfinalform.blocks.presentation.model.graphics.animation.Translate
+import com.fromfinalform.blocks.presentation.model.graphics.interpolator.BounceInterpolator
 import com.fromfinalform.blocks.presentation.model.graphics.renderer.*
 import com.fromfinalform.blocks.presentation.model.graphics.renderer.unit.RenderUnit
 import com.fromfinalform.blocks.presentation.model.graphics.text.TextStyle
@@ -60,15 +63,35 @@ class GamePresenter : MvpPresenter<GamePresenter.GameView>(), LifecycleObserver 
             .withUpdater { viewState.requestRender() }
             .withListener(object : RendererListener {
 
+                lateinit var sceneParams: SceneParams
                 var ru: RenderUnit? = null
                 var ru2: RenderUnit? = null
                 var go: GameObject? = null
 
                 override fun onStart() {
                     viewState.setRenderMode(GLSurfaceView.RENDERMODE_CONTINUOUSLY)
+
+
                 }
 
-                override fun onFirstFrame() {}
+                override fun onFirstFrame() {
+                    var cw = config.blockWidthPx * sceneParams.sx
+                    var ch = config.blockHeightPx * sceneParams.sy
+
+                    glViewRenderer.clearRenderUnits()
+
+                    ru = ClassicGameFieldBackground().build(config).toRenderUnit(sceneParams)
+                    glViewRenderer.add(ru!!)
+
+                    go = BlockBuilder(config).withTypeId(BlockTypeId._128).build()
+                    go!!.translateX(config.blockGapHPx)
+                    ru2 = go!!.toRenderUnit(sceneParams)
+
+                    ru2!!.addAnimation(Translate(PointF(0f, 0f), 0.0005f, 100, BounceInterpolator()))
+
+                    glViewRenderer.add(ru2!!)
+                }
+
                 override fun onStop() {
                     viewState.setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY)
                 }
@@ -79,43 +102,17 @@ class GamePresenter : MvpPresenter<GamePresenter.GameView>(), LifecycleObserver 
 
                     //ru?.withRotation(frame / 2f)
 
-                    go!!.translateX(0.5f)
-                    glViewRenderer.renderUnits.mapLayout(go!!, sceneParams)
+                    //go!!.translateX(0.5f)
+                    //glViewRenderer.renderUnits.mapLayout(go!!, sceneParams)
                 }
 
                 override fun onSceneConfigured(params: SceneParams) {
                     viewState.onSceneConfigured(params)
 
+                    this.sceneParams = params
                     RenderUnit.shaderRepo = ShaderDrawerRepository().apply { initialize() }
 
-                    var cw = config.blockWidthPx * params.sx
-                    var ch = config.blockHeightPx * params.sy
 
-                    glViewRenderer.clearRenderUnits()
-
-
-//                    ru = RenderUnit()
-//                        .withId(1)
-//                        .withLocation(0f - cw/2, 0f + ch/2)
-//                        .withSize(cw, ch)
-//                        .withShader(ShaderDrawerTypeId.GRADIENT)
-//                        .withColor(0xFFFF0000, 0xFF0000FF, 45)
-
-//                    ru = RenderUnit()
-//                        .withId(1)
-//                        .withLocation(0f - cw / 2, 0f + ch / 2)
-//                        .withSize(cw, ch)
-//                        .withShader(ShaderDrawerTypeId.FLAT)
-//                        .withTexture(textureRepo[R.drawable.bg_03])
-
-                    ru = ClassicGameFieldBackground().build(config).toRenderUnit(params)
-                    glViewRenderer.add(ru!!)
-
-                    go = BlockBuilder(config).withTypeId(BlockTypeId._128).build()
-                    go!!.translateX(config.blockGapHPx)
-                    ru2 = go!!.toRenderUnit(params)
-
-                    glViewRenderer.add(ru2!!)
                 }
             })
 

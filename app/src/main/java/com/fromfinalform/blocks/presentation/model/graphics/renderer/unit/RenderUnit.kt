@@ -6,6 +6,9 @@
 package com.fromfinalform.blocks.presentation.model.graphics.renderer.unit
 
 import android.opengl.GLES20
+import com.fromfinalform.blocks.presentation.model.graphics.animation.GLFinishableAnimation
+import com.fromfinalform.blocks.presentation.model.graphics.animation.IGLAnimation
+import com.fromfinalform.blocks.presentation.model.graphics.animation.IGLFinishableAnimation
 import com.fromfinalform.blocks.presentation.model.graphics.drawer.IShaderDrawerRepository
 import com.fromfinalform.blocks.presentation.model.graphics.drawer.ShaderDrawerTypeId
 import com.fromfinalform.blocks.presentation.model.graphics.renderer.IRenderer
@@ -33,6 +36,16 @@ class RenderUnit : RenderItem(), IRenderUnit {
 
     private fun renderImpl(item: RenderItem, renderer: IRenderer, renderParams: RenderParams, sceneParams: SceneParams) {
         val drawer = shaderRepo!![item.shaderTypeId]
+
+        val animationsToRemove = arrayListOf<IGLAnimation>()
+        item.animations?.forEach {
+            if (!it.isInitialized) it.initialize(item, renderParams, sceneParams)
+            it.transform(item, renderParams, sceneParams)
+
+            if (it is IGLFinishableAnimation && it.isFinished)
+                animationsToRemove.add(it)
+        }
+        animationsToRemove.forEach { item.removeAnimation(it) }
 
         when (item.shaderTypeId) {
             ShaderDrawerTypeId.SOLID    -> drawer!!.setUniforms(GLColor(item.color))

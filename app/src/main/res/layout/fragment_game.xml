@@ -74,4 +74,12 @@
         app:layout_constraintStart_toEndOf="@id/btn_start"
         app:layout_constraintTop_toTopOf="@id/btn_start" />
 
+    <TextView
+        android:id="@+id/tv_status"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="stopped"
+        app:layout_constraintStart_toEndOf="@id/btn_stop"
+        app:layout_constraintTop_toTopOf="@id/btn_stop" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>
