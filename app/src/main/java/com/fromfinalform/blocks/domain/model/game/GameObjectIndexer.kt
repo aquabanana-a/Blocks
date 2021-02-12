@@ -13,7 +13,7 @@ class GameObjectIndexer {
         private var indexImpl = 0L
 
         fun getNext(): Long { synchronized(lo) {
-            indexImpl = max(0L, indexImpl++)
+            indexImpl = max(0L, indexImpl + 1)
             return indexImpl
         } }
     }

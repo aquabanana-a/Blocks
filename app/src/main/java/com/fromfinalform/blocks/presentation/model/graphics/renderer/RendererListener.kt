@@ -6,7 +6,7 @@
 package com.fromfinalform.blocks.presentation.model.graphics.renderer
 
 interface RendererListener {
-    fun onFrame(frame: Long, timeMs: Long, deltaTimeMs: Long)
+    fun onFrame(renderParams: RenderParams, sceneParams: SceneParams)
     fun onStart()
     fun onFirstFrame()
     fun onStop()

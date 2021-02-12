@@ -5,9 +5,9 @@
 
 package com.fromfinalform.blocks.presentation.model.graphics.drawer
 
-import android.graphics.RectF
 import com.fromfinalform.blocks.presentation.model.graphics.renderer.SceneParams
 import com.fromfinalform.blocks.presentation.model.graphics.renderer.unit.IRenderUnit
+import com.fromfinalform.blocks.presentation.model.graphics.renderer.unit.ItemParams
 
 interface IShaderDrawer {
     val VERTEX_SHADER: String
@@ -19,5 +19,5 @@ interface IShaderDrawer {
     fun setUniforms(vararg args: Any)
     fun cleanUniforms()
 
-    fun draw(ru: IRenderUnit, params: SceneParams, dst: RectF?, src: RectF?, angle: Float)
+    fun draw(ru: IRenderUnit, sceneParams: SceneParams, itemParams: ItemParams)
 }

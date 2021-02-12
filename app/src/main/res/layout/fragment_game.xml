@@ -12,6 +12,16 @@
     android:clickable="true"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
+    <View
+        android:id="@+id/v_artifact_hider"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:background="#FF20242F"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@id/vg_canvas_group"
+        app:layout_constraintBottom_toBottomOf="@id/vg_canvas_group"/>
+
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/vg_canvas_group"
         android:layout_width="0dp"

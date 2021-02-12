@@ -6,6 +6,7 @@
 package com.fromfinalform.blocks.domain.model.game
 
 import com.fromfinalform.blocks.common.ICloneable
+import com.fromfinalform.blocks.presentation.model.graphics.renderer.unit.RenderItem
 import com.fromfinalform.blocks.presentation.model.graphics.text.TextStyle
 
 open class GameObject(val id: Long = GameObjectIndexer.getNext()) : ICloneable<GameObject> {
@@ -20,6 +21,24 @@ open class GameObject(val id: Long = GameObjectIndexer.getNext()) : ICloneable<G
     var textStyle: TextStyle? = null
 
     var childs: List<GameObject>? = null
+
+    fun translate(dX: Float, dY: Float): GameObject {
+        this.translateX(dX)
+        this.translateY(dY)
+        return this
+    }
+
+    fun translateX(dX: Float): GameObject {
+        this.x += dX
+        this.childs?.forEach { c -> c.translateX(dX) }
+        return this
+    }
+
+    fun translateY(dY: Float): GameObject {
+        this.y -= dY
+        this.childs?.forEach { c -> c.translateY(dY) }
+        return this
+    }
 
     override fun clone(): GameObject {
         val ret = GameObject()

@@ -5,25 +5,44 @@
 
 package com.fromfinalform.blocks.presentation.model.graphics.renderer.unit
 
-import android.graphics.Color
 import android.graphics.RectF
 import android.opengl.GLES20
 import com.fromfinalform.blocks.common.ICloneable
 import com.fromfinalform.blocks.common.clone
+import com.fromfinalform.blocks.common.heightInv
 import com.fromfinalform.blocks.presentation.model.graphics.drawer.ShaderDrawerTypeId
 
-open class RenderItem : ICloneable<RenderItem> {
+open class RenderItem(
+    val itemParams: ItemParams = ItemParams(
+        RectF(-1f, 1f, -1f, 1f),
+        RectF(0f, 0f, 1f, 1f)
+    )) : IRenderItem, ICloneable<RenderItem> {
 
-    var id: Long = -1L;                             private set
+    override var id: Long = -1L
 
-    var x: Float = -1f;                             private set
-    var y: Float = 1f;                              private set
-    var width: Float = 0f;                          private set
-    var height: Float = 0f;                         private set
-    var rotation: Float = 0f;                       private set
+    var x       get()  = itemParams.dstRect.left
+                set(v) { itemParams.dstRect.left = v }
 
-    var srcRect: RectF = RectF(0f, 0f, 1f, 1f);     private set
-    val dstRect: RectF get() = RectF(x, y, x + width, y - height)
+    var y       get()  = itemParams.dstRect.top
+                set(v) { itemParams.dstRect.top = v }
+
+    var width   get()  = itemParams.dstRect.width()
+                set(v) { itemParams.dstRect.right = x + v }
+
+    var height  get()  = itemParams.dstRect.heightInv()
+                set(v) { itemParams.dstRect.bottom = y - v }
+
+    var rotation get()  = itemParams.angle
+                 set(v) { itemParams.angle = v }
+
+//    var x: Float = -1f;                             private set
+//    var y: Float = 1f;                              private set
+//    var width: Float = 0f;                          private set
+//    var height: Float = 0f;                         private set
+//    var rotation: Float = 0f;                       private set
+//
+//    var srcRect: RectF = RectF(0f, 0f, 1f, 1f);     private set
+//    val dstRect: RectF get() = RectF(x, y, x + width, y - height)
 
     var textureId: Int? = null;                     private set
     var color: Long = 0xFF000000;                   private set
@@ -113,7 +132,10 @@ open class RenderItem : ICloneable<RenderItem> {
     }
 
     fun withSrcRect(src: RectF): RenderItem {
-        this.srcRect = src
+        this.itemParams.srcRect.left = src.left
+        this.itemParams.srcRect.top = src.top
+        this.itemParams.srcRect.right = src.right
+        this.itemParams.srcRect.bottom = src.bottom
         return this
     }
 
@@ -154,11 +176,7 @@ open class RenderItem : ICloneable<RenderItem> {
     }
 
     override fun clone(): RenderItem { synchronized(childsLo) {
-        return RenderItem()
-            .withLocation(x, y)
-            .withRotation(rotation)
-            .withSize(width, height)
-            .withSrcRect(srcRect.clone())
+        return RenderItem(itemParams.copy())
             .withTexture(textureId)
             .withColor(color, colorSecondary, colorAngle)
             .withShader(shaderTypeId)

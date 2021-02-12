@@ -8,6 +8,8 @@ package com.fromfinalform.blocks.presentation.mapper
 import com.fromfinalform.blocks.domain.model.game.GameObject
 import com.fromfinalform.blocks.presentation.model.graphics.drawer.ShaderDrawerTypeId
 import com.fromfinalform.blocks.presentation.model.graphics.renderer.SceneParams
+import com.fromfinalform.blocks.presentation.model.graphics.renderer.unit.IRenderItem
+import com.fromfinalform.blocks.presentation.model.graphics.renderer.unit.IRenderUnit
 import com.fromfinalform.blocks.presentation.model.graphics.renderer.unit.RenderItem
 import com.fromfinalform.blocks.presentation.model.graphics.renderer.unit.RenderUnit
 import com.fromfinalform.blocks.presentation.model.graphics.texture.ITextTextureRepository
@@ -47,17 +49,20 @@ class GraphicsMapper {
             }
         }
 
-        fun RenderItem.mapLayout(src: GameObject, params: SceneParams) = arrayListOf(this).mapLayout(arrayListOf(src), params)
-        fun List<RenderItem>.mapLayout(src: List<GameObject>?, params: SceneParams) {
+        fun IRenderItem.mapLayout(src: GameObject, params: SceneParams) = arrayListOf(this).mapLayout(arrayListOf(src), params)
+        fun List<IRenderItem>.mapLayout(src: GameObject, params: SceneParams) = this.mapLayout(arrayListOf(src), params)
+        fun List<IRenderItem>.mapLayout(src: List<GameObject>?, params: SceneParams) {
             if (src == null)
                 return
 
             for (go in src)
-                for (ru in this)
-                    if (ru.id == go.id) {
-                        ru.setLayout(-1 + go.x * params.sx, 1 - go.y * params.sy, go.width * params.sx, go.height * params.sy, go.rotation)
-                        ru.childs?.mapLayout(go.childs, params)
+                for (iri in this) {
+                    val ri = iri as? RenderItem
+                    if (ri?.id == go.id) {
+                        ri.setLayout(-1 + go.x * params.sx, 1 - go.y * params.sy, go.width * params.sx, go.height * params.sy, go.rotation)
+                        ri.childs?.mapLayout(go.childs, params)
                     }
+                }
         }
     }
 }

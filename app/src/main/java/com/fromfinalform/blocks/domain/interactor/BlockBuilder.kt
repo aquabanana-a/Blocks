@@ -5,10 +5,14 @@
 
 package com.fromfinalform.blocks.domain.interactor
 
+import android.view.Gravity
+import com.fromfinalform.blocks.R
 import com.fromfinalform.blocks.data.repository.ClassicBlockTypeRepository
 import com.fromfinalform.blocks.domain.model.block.Block
 import com.fromfinalform.blocks.domain.model.block.BlockTypeId
+import com.fromfinalform.blocks.domain.model.game.GameObject
 import com.fromfinalform.blocks.domain.model.game.IGameConfig
+import com.fromfinalform.blocks.presentation.model.graphics.text.TextStyle
 
 class BlockBuilder(val config: IGameConfig) {
 
@@ -25,6 +29,13 @@ class BlockBuilder(val config: IGameConfig) {
         ret.width = config.blockWidthPx
         ret.height = config.blockHeightPx
         ret.color = blockTypeRepo[typeId].bgColor
+
+        ret.childs = arrayListOf(GameObject().apply {
+            width = ret.width
+            height = ret.height
+            textStyle = TextStyle(typeId.toString(), 28f, R.font.jura_bold, 0xFFFFFFFF, 0x00000000).withInnerGravity(Gravity.CENTER)
+        })
+
         return ret
     }
 }

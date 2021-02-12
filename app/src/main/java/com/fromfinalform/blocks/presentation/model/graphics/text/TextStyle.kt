@@ -10,11 +10,11 @@ data class TextStyle(
     var textFontId: Int,
     var textColor: Long = 0xFF000000,
     var textBackColor: Long = 0x00000000,
-    var textAlign: Int = View.TEXT_ALIGNMENT_CENTER
+    var textAlign: Int = View.TEXT_ALIGNMENT_TEXT_START//View.TEXT_ALIGNMENT_CENTER
 ) : Serializable {
 
     var lineSpaceMultiplier = 1.0f//; private set
-    var innerGravity = Gravity.CENTER
+    var innerGravity = Gravity.START or Gravity.TOP or Gravity.BOTTOM//Gravity.CENTER
 
     var paddingLeft = 0f
     var paddingRight = 0f

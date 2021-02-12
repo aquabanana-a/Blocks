@@ -5,7 +5,6 @@
 
 package com.fromfinalform.blocks.presentation.model.graphics.drawer
 
-import android.graphics.PointF
 import android.graphics.RectF
 import android.opengl.GLES20
 import com.fromfinalform.blocks.presentation.model.graphics.common.rotateMesh
@@ -13,6 +12,7 @@ import com.fromfinalform.blocks.presentation.model.graphics.opengl.common.GLUtil
 import com.fromfinalform.blocks.presentation.model.graphics.renderer.SceneParams
 import com.fromfinalform.blocks.presentation.model.graphics.renderer.data.GLVertices
 import com.fromfinalform.blocks.presentation.model.graphics.renderer.unit.IRenderUnit
+import com.fromfinalform.blocks.presentation.model.graphics.renderer.unit.ItemParams
 
 class FlatShaderDrawer() : IShaderDrawer {
     companion object {
@@ -117,8 +117,8 @@ class FlatShaderDrawer() : IShaderDrawer {
         this.textureId = -1
     }
 
-    override fun draw(ru: IRenderUnit, params: SceneParams, dst: RectF?, src: RectF?, angle: Float) {
-        if (dst == null || src == null || textureId < 0)
+    override fun draw(ru: IRenderUnit, sceneParams: SceneParams, itemParams: ItemParams) {
+        if (textureId < 0)
             return
 
         GLES20.glUseProgram(program)
@@ -126,11 +126,10 @@ class FlatShaderDrawer() : IShaderDrawer {
         GLES20.glActiveTexture(GLES20.GL_TEXTURE0)
         GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, textureId)
 
-        refreshMesh(dst, src, params)
+        refreshMesh(itemParams.dstRect, itemParams.srcRect, sceneParams)
 
-        val pivot = PointF((dst.left + dst.right) / 2, (dst.bottom + dst.top) / 2)
-        if (angle % 360 != 0f)
-            rotateMesh(vertexBuffer, 0, bufferIndex, angle, pivot, params.sceneWH, VERTEX_SIZE)
+        if (itemParams.angle % 360 != 0f)
+            rotateMesh(vertexBuffer, 0, bufferIndex, itemParams.angle, itemParams.dstPivot, sceneParams.sceneWH, VERTEX_SIZE)
 
         vertices.setVertices(vertexBuffer, 0, bufferIndex)
         vertices.bind()

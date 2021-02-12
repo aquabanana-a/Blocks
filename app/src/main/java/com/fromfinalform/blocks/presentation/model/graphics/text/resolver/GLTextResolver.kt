@@ -10,6 +10,7 @@ import com.fromfinalform.blocks.common.mul
 import com.fromfinalform.blocks.common.toRectF
 import com.fromfinalform.blocks.presentation.model.graphics.drawer.ISpriteDrawer
 import com.fromfinalform.blocks.presentation.model.graphics.renderer.SceneParams
+import com.fromfinalform.blocks.presentation.model.graphics.renderer.unit.ItemParams
 import com.fromfinalform.blocks.presentation.model.graphics.text.GLChar
 import com.vdurmont.emoji.EmojiManager
 import com.vdurmont.emoji.EmojiParser
@@ -125,7 +126,8 @@ class GLTextResolver(val glTextTexture: GLTextTexture, val params: SceneParams) 
 //        }
 //    }
 
-    fun drawText(dst: RectF) {
+    fun drawText(itemParams: ItemParams) {
+        val dst = itemParams.dstRect
         val reconfigure = false
 
         val origDst = dst.clone() // TODO

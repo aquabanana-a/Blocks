@@ -16,6 +16,7 @@ import com.fromfinalform.blocks.presentation.model.graphics.renderer.SceneParams
 import com.fromfinalform.blocks.presentation.model.graphics.renderer.data.GLGradient
 import com.fromfinalform.blocks.presentation.model.graphics.renderer.data.GLVertices
 import com.fromfinalform.blocks.presentation.model.graphics.renderer.unit.IRenderUnit
+import com.fromfinalform.blocks.presentation.model.graphics.renderer.unit.ItemParams
 import kotlin.math.sqrt
 
 class GradientShaderDrawer() : IShaderDrawer {
@@ -228,20 +229,16 @@ class GradientShaderDrawer() : IShaderDrawer {
         this.clipBuffer = FloatArray(10) { 0f }
     }
 
-    override fun draw(ru: IRenderUnit, params: SceneParams, dst: RectF?, src: RectF?, angle: Float) {
-        if (dst == null)
-            return
-
+    override fun draw(ru: IRenderUnit, sceneParams: SceneParams, itemParams: ItemParams) {
         GLES20.glUseProgram(program)
 
-        refreshMesh(dst, params)
-        fillClipBuffer(dst)
+        refreshMesh(itemParams.dstRect, sceneParams)
+        fillClipBuffer(itemParams.dstRect)
 
-        val pivot = PointF((dst.left + dst.right) / 2, (dst.bottom + dst.top) / 2)
-        val bga = background.angle + angle
+        val bga = background.angle + itemParams.angle
         if (bga % 360 != 0f) {
-            rotateMesh(clipBuffer, 0, 8, angle, pivot, params.sceneWH, 2)
-            rotateMesh(vertexBuffer, 0, bufferIndex, bga, pivot, params.sceneWH, VERTEX_SIZE)
+            rotateMesh(clipBuffer, 0, 8, itemParams.angle, itemParams.dstPivot, sceneParams.sceneWH, 2)
+            rotateMesh(vertexBuffer, 0, bufferIndex, bga, itemParams.dstPivot, sceneParams.sceneWH, VERTEX_SIZE)
         }
 
         GLES20.glUniform2fv(clipHandle, 5, clipBuffer, 0)

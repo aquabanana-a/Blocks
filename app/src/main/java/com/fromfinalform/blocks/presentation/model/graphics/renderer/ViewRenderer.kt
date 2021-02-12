@@ -79,8 +79,10 @@ class ViewRenderer(clearColor: Long, override var sceneSize: ISize) : IRenderer 
         ++frames
 
         val nowTimeMs = System.currentTimeMillis()
-        val deltaTimeMs = if (lastFrameTimeMs <= 0) 0 else max(0, nowTimeMs - lastFrameTimeMs)
         val renderTimeMs = nowTimeMs - startTime
+        val deltaTimeMs = if (lastFrameTimeMs <= 0) 0 else max(0, nowTimeMs - lastFrameTimeMs)
+        var renderParams = RenderParams(frames, renderTimeMs, deltaTimeMs)
+
         GLUtils.clear(bgARGB)
 
         if (isStarted) {
@@ -89,13 +91,13 @@ class ViewRenderer(clearColor: Long, override var sceneSize: ISize) : IRenderer 
                 handler?.onStop()
             }
             else {
-                handler?.onFrame(frames, renderTimeMs, deltaTimeMs)
+                handler?.onFrame(renderParams, sceneParams)
             }
         }
 
         synchronized(renderUnitsLo) {
             for (ru in renderUnitsSorted)
-                ru.render(this, sceneParams, renderTimeMs, deltaTimeMs)
+                ru.render(this, renderParams, sceneParams)
         }
 
         lastFrameTimeMs = nowTimeMs

@@ -9,6 +9,7 @@ import android.opengl.GLES20
 import com.fromfinalform.blocks.presentation.model.graphics.drawer.IShaderDrawerRepository
 import com.fromfinalform.blocks.presentation.model.graphics.drawer.ShaderDrawerTypeId
 import com.fromfinalform.blocks.presentation.model.graphics.renderer.IRenderer
+import com.fromfinalform.blocks.presentation.model.graphics.renderer.RenderParams
 import com.fromfinalform.blocks.presentation.model.graphics.renderer.SceneParams
 import com.fromfinalform.blocks.presentation.model.graphics.renderer.data.GLColor
 import com.fromfinalform.blocks.presentation.model.graphics.renderer.data.GLGradient
@@ -26,11 +27,11 @@ class RenderUnit : RenderItem(), IRenderUnit {
         return this
     }
 
-    override fun render(renderer: IRenderer, params: SceneParams, timeMs: Long, deltaTimeMs: Long) {
-        renderImpl(this, renderer, params, timeMs, deltaTimeMs)
+    override fun render(renderer: IRenderer, renderParams: RenderParams, sceneParams: SceneParams) {
+        renderImpl(this, renderer, renderParams, sceneParams)
     }
 
-    private fun renderImpl(item: RenderItem, renderer: IRenderer, params: SceneParams, timeMs: Long, deltaTimeMs: Long) {
+    private fun renderImpl(item: RenderItem, renderer: IRenderer, renderParams: RenderParams, sceneParams: SceneParams) {
         val drawer = shaderRepo!![item.shaderTypeId]
 
         when (item.shaderTypeId) {
@@ -47,13 +48,13 @@ class RenderUnit : RenderItem(), IRenderUnit {
         } else GLES20.glDisable(GLES20.GL_BLEND)
 
         if (drawer != null) {
-            drawer.draw(this, params, item.dstRect, item.srcRect, item.rotation)
+            drawer.draw(this, sceneParams, item.itemParams)
             drawer.cleanUniforms()
         }
 
         if (item.childs != null)
             for (c in item.childs!!)
-                renderImpl(c, renderer, params, timeMs, deltaTimeMs)
+                renderImpl(c, renderer, renderParams, sceneParams)
     }
 
     override fun prerender(renderer: IRenderer) {

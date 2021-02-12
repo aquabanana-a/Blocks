@@ -14,6 +14,7 @@ import com.fromfinalform.blocks.presentation.model.graphics.renderer.SceneParams
 import com.fromfinalform.blocks.presentation.model.graphics.renderer.data.GLColor
 import com.fromfinalform.blocks.presentation.model.graphics.renderer.data.GLVertices
 import com.fromfinalform.blocks.presentation.model.graphics.renderer.unit.IRenderUnit
+import com.fromfinalform.blocks.presentation.model.graphics.renderer.unit.ItemParams
 
 class SolidShaderDrawer() : IShaderDrawer {
     companion object {
@@ -108,17 +109,13 @@ class SolidShaderDrawer() : IShaderDrawer {
         this.color = GLColor.BLACK
     }
 
-    override fun draw(ru: IRenderUnit, params: SceneParams, dst: RectF?, src: RectF?, angle: Float) {
-        if (dst == null)
-            return
-
+    override fun draw(ru: IRenderUnit, sceneParams: SceneParams, itemParams: ItemParams) {
         GLES20.glUseProgram(program)
 
-        refreshMesh(dst, params)
+        refreshMesh(itemParams.dstRect, sceneParams)
 
-        val pivot = PointF((dst.left + dst.right) / 2, (dst.bottom + dst.top) / 2)
-        if (angle % 360 != 0f)
-            rotateMesh(vertexBuffer, 0, bufferIndex, angle, pivot, params.sceneWH, VERTEX_SIZE)
+        if (itemParams.angle % 360 != 0f)
+            rotateMesh(vertexBuffer, 0, bufferIndex, itemParams.angle, itemParams.dstPivot, sceneParams.sceneWH, VERTEX_SIZE)
 
         vertices.setVertices(vertexBuffer, 0, bufferIndex)
         vertices.bind()

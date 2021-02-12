@@ -19,6 +19,7 @@ import com.fromfinalform.blocks.domain.interactor.BlockBuilder
 import com.fromfinalform.blocks.domain.model.block.BlockTypeId
 import com.fromfinalform.blocks.domain.model.game.GameObject
 import com.fromfinalform.blocks.domain.model.game.IGameConfig
+import com.fromfinalform.blocks.presentation.mapper.GraphicsMapper.Companion.mapLayout
 import com.fromfinalform.blocks.presentation.mapper.GraphicsMapper.Companion.toRenderUnit
 import com.fromfinalform.blocks.presentation.model.graphics.renderer.*
 import com.fromfinalform.blocks.presentation.model.graphics.renderer.unit.RenderUnit
@@ -60,6 +61,8 @@ class GamePresenter : MvpPresenter<GamePresenter.GameView>(), LifecycleObserver 
             .withListener(object : RendererListener {
 
                 var ru: RenderUnit? = null
+                var ru2: RenderUnit? = null
+                var go: GameObject? = null
 
                 override fun onStart() {
                     viewState.setRenderMode(GLSurfaceView.RENDERMODE_CONTINUOUSLY)
@@ -71,10 +74,13 @@ class GamePresenter : MvpPresenter<GamePresenter.GameView>(), LifecycleObserver 
                 }
 
                 override fun onCrash() {}
-                override fun onFrame(frame: Long, timeMs: Long, deltaTimeMs: Long) {
+                override fun onFrame(renderParams: RenderParams, sceneParams: SceneParams) {
 //                    looper.onFrame(frame, timeMs, deltaTimeMs)
 
-                    ru?.withRotation(frame / 2f)
+                    //ru?.withRotation(frame / 2f)
+
+                    go!!.translateX(0.5f)
+                    glViewRenderer.renderUnits.mapLayout(go!!, sceneParams)
                 }
 
                 override fun onSceneConfigured(params: SceneParams) {
@@ -105,22 +111,11 @@ class GamePresenter : MvpPresenter<GamePresenter.GameView>(), LifecycleObserver 
                     ru = ClassicGameFieldBackground().build(config).toRenderUnit(params)
                     glViewRenderer.add(ru!!)
 
-                    var go = BlockBuilder(config).withTypeId(BlockTypeId._128).build()
-                    go.x = config.blockGapHPx
+                    go = BlockBuilder(config).withTypeId(BlockTypeId._128).build()
+                    go!!.translateX(config.blockGapHPx)
+                    ru2 = go!!.toRenderUnit(params)
 
-                    var goTxt = GameObject()
-                    goTxt.x = config.blockGapHPx
-                    goTxt.width = config.blockWidthPx
-                    goTxt.height = config.blockHeightPx
-                    goTxt.textStyle = TextStyle("BABa Milo karolina parsed wagen", 22f, R.font.comfortaa_regular, 0xFFFFFFFF, 0xFFFF0000, View.TEXT_ALIGNMENT_TEXT_START)
-                    goTxt.textStyle!!.withInnerGravity(Gravity.CENTER)
-                    goTxt.textStyle!!.withPaddings(left = 10f, right = 20f, top = 60f, bottom = 20f)
-
-                    go.childs = arrayListOf()
-                    (go.childs as MutableList).add(goTxt)
-
-                    var ru2 = go.toRenderUnit(params)
-                    glViewRenderer.add(ru2)
+                    glViewRenderer.add(ru2!!)
                 }
             })
 

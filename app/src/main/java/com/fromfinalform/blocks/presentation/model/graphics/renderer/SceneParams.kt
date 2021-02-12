@@ -7,7 +7,7 @@ package com.fromfinalform.blocks.presentation.model.graphics.renderer
 
 import android.graphics.PointF
 
-class SceneParams(
+data class SceneParams(
     var sceneWidth: Float,
     var sceneHeight: Float,
     var surfaceWidth: Float,

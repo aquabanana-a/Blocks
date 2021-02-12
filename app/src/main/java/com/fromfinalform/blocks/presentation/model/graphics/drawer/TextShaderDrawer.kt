@@ -12,6 +12,7 @@ import com.fromfinalform.blocks.presentation.model.graphics.renderer.data.GLColo
 import com.fromfinalform.blocks.presentation.model.graphics.renderer.data.GLTextureRegion
 import com.fromfinalform.blocks.presentation.model.graphics.renderer.data.GLVertices
 import com.fromfinalform.blocks.presentation.model.graphics.renderer.unit.IRenderUnit
+import com.fromfinalform.blocks.presentation.model.graphics.renderer.unit.ItemParams
 import io.instories.core.render.resolver.GLTextResolver
 import kotlin.math.min
 
@@ -287,13 +288,13 @@ class TextShaderDrawer : IShaderDrawer, ISpriteDrawer {
         }
     }
 
-    override fun draw(ru: IRenderUnit, params: SceneParams, dst: RectF?, src: RectF?, angle: Float) {
-        if (dst == null || src == null || textResolver == null)
+    override fun draw(ru: IRenderUnit, sceneParams: SceneParams, itemParams: ItemParams) {
+        if (textResolver == null)
             return
 
         this.params = params
         this.angle = angle
-        this.pivot = PointF((dst.left + dst.right) / 2, (dst.bottom + dst.top) / 2)
+        this.pivot = itemParams.dstPivot
 
         GLES20.glUseProgram(program)
 
@@ -301,7 +302,7 @@ class TextShaderDrawer : IShaderDrawer, ISpriteDrawer {
         GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, textResolver!!.glTextTexture.textureId)
 
         beginBatch()
-        textResolver!!.drawText(dst)
+        textResolver!!.drawText(itemParams)
         endBatch()
     }
 }

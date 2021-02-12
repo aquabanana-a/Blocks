@@ -6,16 +6,16 @@
 package com.fromfinalform.blocks.presentation.model.graphics.renderer.unit
 
 import com.fromfinalform.blocks.presentation.model.graphics.renderer.IRenderer
+import com.fromfinalform.blocks.presentation.model.graphics.renderer.RenderParams
 import com.fromfinalform.blocks.presentation.model.graphics.renderer.SceneParams
 
-interface IRenderUnit {
-    val id: Long
+interface IRenderUnit : IRenderItem {
     val childs: List<RenderItem>?
 
     fun addChild(value: RenderItem)
     fun removeChild(id: Long): RenderItem?
 
     fun prerender(renderer: IRenderer)
-    fun render(renderer: IRenderer, params: SceneParams, timeMs: Long, deltaTimeMs: Long)
+    fun render(renderer: IRenderer, renderParams: RenderParams, sceneParams: SceneParams)
     fun postrender(renderer: IRenderer)
 }
