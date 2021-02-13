@@ -5,6 +5,7 @@
 
 package com.fromfinalform.blocks.presentation.view
 
+import android.graphics.PointF
 import android.opengl.GLSurfaceView
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -12,9 +13,10 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
-import androidx.navigation.NavController
-import androidx.navigation.findNavController
 import com.fromfinalform.blocks.R
+import com.fromfinalform.blocks.presentation.model.graphics.animation.RotateTo
+import com.fromfinalform.blocks.presentation.model.graphics.animation.TranslateTo
+import com.fromfinalform.blocks.presentation.model.graphics.interpolator.BounceInterpolator
 import com.fromfinalform.blocks.presentation.model.graphics.opengl.EGL10ContextFactory
 import com.fromfinalform.blocks.presentation.model.graphics.renderer.SceneParams
 import com.fromfinalform.blocks.presentation.presenter.GamePresenter
@@ -52,19 +54,21 @@ class GameFragment : MvpAppCompatFragment(), GamePresenter.GameView {
         glSurface.setEGLContextFactory(EGL10ContextFactory())
         glSurface.setEGLContextClientVersion(2)
         glSurface.setRenderer(presenter.renderer)
-        setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY)
+
+        presenter.renderer.start()
 
         tvStatus = vRoot.findViewById(R.id.tv_status)
 
         vRoot.findViewById<View>(R.id.btn_start).setOnClickListener {
             //it.findNavController().navigate(GameFragmentDirections.actionGameFragmentToScoreFragment())
-            presenter.renderer.start()
-            tvStatus.text = "looping"
+
+            presenter.ru2!!.withLocation(-1f, 1f)
+            presenter.ru2!!.addAnimation(TranslateTo(PointF(0f, 0f), 0.0005f, presenter.renderer.renderTimeMs + 100, BounceInterpolator()))
+            presenter.ru2!!.addAnimation(RotateTo(presenter.ru2!!.itemParams.angle + 900, 0.1f, presenter.renderer.renderTimeMs + 100, BounceInterpolator()))
         }
 
         vRoot.findViewById<View>(R.id.btn_stop).setOnClickListener {
-            presenter.renderer.stop()
-            tvStatus.text = "stopped"
+
         }
 
         return vRoot

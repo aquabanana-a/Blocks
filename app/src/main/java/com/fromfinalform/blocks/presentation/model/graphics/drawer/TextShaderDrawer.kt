@@ -43,7 +43,8 @@ class TextShaderDrawer : IShaderDrawer, ISpriteDrawer {
         """
 
     override val FRAGMENT_SHADER = """
-        precision mediump float;                                                             
+        /*precision mediump float;*/
+        precision highp float;                                                            
         varying vec2 vTextureCoord;                                                          
         varying vec2 vPositionCoord;                                                         
         varying vec4 vColor;                                                                 
@@ -86,9 +87,9 @@ class TextShaderDrawer : IShaderDrawer, ISpriteDrawer {
 
     private var clipBuffer: FloatArray
 
-    private var params:SceneParams? = null
-    private var angle       = 0f
-    private var pivot       = PointF()
+    private var sceneParams: SceneParams? = null
+    private var itemParams: ItemParams? = null
+    private var parentParams: ItemParams? = null
 
     private var positionHandle = -1
     private var textureHandle = -1
@@ -143,9 +144,9 @@ class TextShaderDrawer : IShaderDrawer, ISpriteDrawer {
     }
 
     override fun cleanUniforms() {
-        this.params = null
-
-        angle = 0f
+        this.sceneParams = null
+        this.itemParams = null
+        this.parentParams = null
 
         clipRect = null
         clipRectPrev = null
@@ -197,6 +198,17 @@ class TextShaderDrawer : IShaderDrawer, ISpriteDrawer {
         bufferIndex = 0
     }
 
+    private fun rotateBy(itemParams: ItemParams?, sceneParams: SceneParams) {
+        if (itemParams == null)
+            return
+
+        val recalcClip = clipBuffer [9] < 1.0f
+        if (itemParams.angle % 360 != 0f) {
+            if (recalcClip) rotateMesh(clipBuffer, 0, 8, itemParams.angle, itemParams.anglePivot, sceneParams.sceneWH, 2)
+            rotateMesh(vertexBuffer, 0, bufferIndex, itemParams.angle, itemParams.anglePivot, sceneParams.sceneWH, VERTEX_SIZE)
+        }
+    }
+
     private fun endBatch() {
         if(numSprites <= 0)
             return
@@ -204,10 +216,8 @@ class TextShaderDrawer : IShaderDrawer, ISpriteDrawer {
         fillClipBuffer(clipRect)
         val recalcClip = clipBuffer[9] < 1.0f
 
-        if (angle % 360 != 0f) {
-            if (recalcClip) rotateMesh(clipBuffer, 0, 8, angle, pivot, params!!.sceneWH, 2)
-            rotateMesh(vertexBuffer, 0, bufferIndex, angle, pivot, params!!.sceneWH, VERTEX_SIZE)
-        }
+        rotateBy(parentParams, sceneParams!!)
+        rotateBy(itemParams, sceneParams!!)
 
         if(recalcClip) {
             GLES20.glUniform2fv(clipHandle, 5, clipBuffer, 0)
@@ -288,13 +298,13 @@ class TextShaderDrawer : IShaderDrawer, ISpriteDrawer {
         }
     }
 
-    override fun draw(ru: IRenderUnit, sceneParams: SceneParams, itemParams: ItemParams) {
+    override fun draw(ru: IRenderUnit, sceneParams: SceneParams, itemParams: ItemParams, parentParams: ItemParams?) {
         if (textResolver == null)
             return
 
-        this.params = params
-        this.angle = angle
-        this.pivot = itemParams.dstPivot
+        this.sceneParams = sceneParams
+        this.itemParams = itemParams
+        this.parentParams = parentParams
 
         GLES20.glUseProgram(program)
 

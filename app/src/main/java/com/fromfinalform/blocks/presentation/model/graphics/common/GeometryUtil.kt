@@ -152,3 +152,15 @@ fun rotateMesh(vertices: FloatArray, verticesOffset: Int, verticesCount: Int, an
         i += vertexSize
     }
 }
+
+fun rotateGLPoint(src: PointF, pivot: PointF, angleDeg: Float) {
+    val angleRad = angleDeg * PI / 180.0
+    val s = sin(angleRad)
+    val c = cos(angleRad)
+
+    val xnew = c * (src.x - pivot.x) - s * (src.y - pivot.y) + pivot.x
+    val ynew = s * (src.x - pivot.x) + c * (src.y - pivot.y) + pivot.y
+
+    src.x = xnew.toFloat()
+    src.y = ynew.toFloat()
+}

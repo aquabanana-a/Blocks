@@ -23,30 +23,30 @@ open class RenderItem(
     var x       get()  = itemParams.dstRect.left
                 set(v) { val dx = v - itemParams.dstRect.left
                          itemParams.dstRect.left = v
-                         itemParams.dstRect.right += dx }
+                         itemParams.dstRect.right += dx
+                         itemParams.anglePivot.x += dx }
 
     var y       get()  = itemParams.dstRect.top
-                set(v) { val dy = itemParams.dstRect.top -  v
+                set(v) { val dy = itemParams.dstRect.top - v
                          itemParams.dstRect.top = v
-                         itemParams.dstRect.bottom -= dy }
+                         itemParams.dstRect.bottom -= dy
+                         itemParams.anglePivot.y -= dy }
 
     var width   get()  = itemParams.dstRect.width()
-                set(v) { itemParams.dstRect.right = x + v }
+                set(v) { val dw = v - itemParams.dstRect.width()
+                         itemParams.dstRect.right = x + v
+                         itemParams.anglePivot.x += dw / 2 }
 
     var height  get()  = itemParams.dstRect.heightInv()
-                set(v) { itemParams.dstRect.bottom = y - v }
+                set(v) { val dh = v - itemParams.dstRect.heightInv()
+                         itemParams.dstRect.bottom = y - v
+                         itemParams.anglePivot.y -= dh / 2 }
 
     var rotation get()  = itemParams.angle
                  set(v) { itemParams.angle = v }
 
-//    var x: Float = -1f;                             private set
-//    var y: Float = 1f;                              private set
-//    var width: Float = 0f;                          private set
-//    var height: Float = 0f;                         private set
-//    var rotation: Float = 0f;                       private set
-//
-//    var srcRect: RectF = RectF(0f, 0f, 1f, 1f);     private set
-//    val dstRect: RectF get() = RectF(x, y, x + width, y - height)
+    var rotationPivot get()  = itemParams.anglePivot
+                      set(v) { itemParams.anglePivot = v }
 
     var textureId: Int? = null;                     private set
     var color: Long = 0xFF000000;                   private set
@@ -63,7 +63,7 @@ open class RenderItem(
 
     private val lo = Any()
     var childs: List<RenderItem>? = null;           private set
-    var animations: List<IGLAnimation>? = null;      private set
+    var animations: List<IGLAnimation>? = null;     private set
 
     val usedBlend get() = usedBlendFactor || usedBlendSeparate
     val usedBlendFactor get() = blendSrc > 0 && blendDst > 0
@@ -75,21 +75,33 @@ open class RenderItem(
         return this
     } }
 
-    fun translateXwidth(times: Int): RenderItem {
-        this.translateX(times * width)
-        return this
-    }
-
     fun translateY(dY: Float): RenderItem { synchronized(lo) {
         this.y -= dY
         this.childs?.forEach { c -> c.translateY(dY) }
         return this
     } }
 
-    fun translateYheight(times: Int): RenderItem {
+    fun translateXY(dX: Float, dY: Float): RenderItem { synchronized(lo) {
+        this.x += dX
+        this.y -= dY
+        this.childs?.forEach { c -> c.translateXY(dX, dY) }
+        return this
+    } }
+
+    fun translateXWidth(times: Int): RenderItem {
+        this.translateX(times * width)
+        return this
+    }
+
+    fun translateYHeight(times: Int): RenderItem {
         this.translateY(times * height)
         return this
     }
+
+    fun rotate(dA: Float): RenderItem { synchronized(lo) {
+        this.rotation += dA
+        return this
+    } }
 
     fun addChild(value: RenderItem) { synchronized(lo) {
         if(this.childs == null)
@@ -129,10 +141,8 @@ open class RenderItem(
     } }
 
     fun withLocation(x: Float, y: Float): RenderItem {
-        this.x = x
-        this.y = y
-//        this.translateX(x + this.x)
-//        this.translateY(y + this.y)
+        this.translateX(x - this.x)
+        this.translateY(this.y - y)
         return this
     }
 

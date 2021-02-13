@@ -34,7 +34,8 @@ class FlatShaderDrawer() : IShaderDrawer {
         """
 
     override val FRAGMENT_SHADER = """
-        precision mediump float;
+        /*precision mediump float;*/
+        precision highp float;
         varying vec2 vTextureCoord;
         uniform sampler2D sTexture;
         
@@ -117,7 +118,15 @@ class FlatShaderDrawer() : IShaderDrawer {
         this.textureId = -1
     }
 
-    override fun draw(ru: IRenderUnit, sceneParams: SceneParams, itemParams: ItemParams) {
+    private fun rotateBy(itemParams: ItemParams?, sceneParams: SceneParams) {
+        if (itemParams == null)
+            return
+
+        if (itemParams.angle % 360 != 0f)
+            rotateMesh(vertexBuffer, 0, bufferIndex, itemParams.angle, itemParams.anglePivot, sceneParams.sceneWH, SolidShaderDrawer.VERTEX_SIZE)
+    }
+
+    override fun draw(ru: IRenderUnit, sceneParams: SceneParams, itemParams: ItemParams, parentParams: ItemParams?) {
         if (textureId < 0)
             return
 
@@ -128,8 +137,8 @@ class FlatShaderDrawer() : IShaderDrawer {
 
         refreshMesh(itemParams.dstRect, itemParams.srcRect, sceneParams)
 
-        if (itemParams.angle % 360 != 0f)
-            rotateMesh(vertexBuffer, 0, bufferIndex, itemParams.angle, itemParams.dstPivot, sceneParams.sceneWH, VERTEX_SIZE)
+        rotateBy(parentParams, sceneParams)
+        rotateBy(itemParams, sceneParams)
 
         vertices.setVertices(vertexBuffer, 0, bufferIndex)
         vertices.bind()

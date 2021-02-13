@@ -64,6 +64,8 @@ class ViewRenderer(clearColor: Long, override var sceneSize: ISize) : IRenderer 
     private var isStarted = false
     private var isStopRequested = false
 
+    override var renderTimeMs: Long = 0L; private set
+
     override fun onSurfaceCreated(gl: GL10?, config: EGLConfig?) {
 
     }
@@ -76,14 +78,13 @@ class ViewRenderer(clearColor: Long, override var sceneSize: ISize) : IRenderer 
     }
 
     override fun onDrawFrame(gl: GL10?) { try {
-        if (isStarted && frames == 0L) {
+        if (isStarted && frames == 0L)
             handler?.onFirstFrame()
-        }
 
         ++frames
 
         val nowTimeMs = System.currentTimeMillis()
-        val renderTimeMs = nowTimeMs - startTime
+        renderTimeMs = nowTimeMs - startTime
         val deltaTimeMs = if (lastFrameTimeMs <= 0) 0 else max(0, nowTimeMs - lastFrameTimeMs)
         var renderParams = RenderParams(frames, renderTimeMs, deltaTimeMs)
 

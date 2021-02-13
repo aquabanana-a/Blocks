@@ -35,7 +35,7 @@ open class GameObject(val id: Long = GameObjectIndexer.getNext()) : ICloneable<G
     }
 
     fun translateY(dY: Float): GameObject {
-        this.y -= dY
+        this.y += dY
         this.childs?.forEach { c -> c.translateY(dY) }
         return this
     }

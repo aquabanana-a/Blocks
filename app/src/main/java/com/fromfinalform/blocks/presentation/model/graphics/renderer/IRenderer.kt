@@ -10,6 +10,7 @@ import com.fromfinalform.blocks.presentation.model.graphics.renderer.unit.IRende
 
 interface IRenderer : GLSurfaceView.Renderer {
     val sceneSize: ISize
+    val renderTimeMs: Long
 
     val renderUnits: List<IRenderUnit>
     fun add(ru: IRenderUnit)

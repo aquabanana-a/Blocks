@@ -6,9 +6,8 @@
 package com.fromfinalform.blocks.presentation.model.graphics.renderer.unit
 
 import android.opengl.GLES20
-import com.fromfinalform.blocks.presentation.model.graphics.animation.GLFinishableAnimation
 import com.fromfinalform.blocks.presentation.model.graphics.animation.IGLAnimation
-import com.fromfinalform.blocks.presentation.model.graphics.animation.IGLFinishableAnimation
+import com.fromfinalform.blocks.presentation.model.graphics.animation.IGLCompletableAnimation
 import com.fromfinalform.blocks.presentation.model.graphics.drawer.IShaderDrawerRepository
 import com.fromfinalform.blocks.presentation.model.graphics.drawer.ShaderDrawerTypeId
 import com.fromfinalform.blocks.presentation.model.graphics.renderer.IRenderer
@@ -34,15 +33,15 @@ class RenderUnit : RenderItem(), IRenderUnit {
         renderImpl(this, renderer, renderParams, sceneParams)
     }
 
-    private fun renderImpl(item: RenderItem, renderer: IRenderer, renderParams: RenderParams, sceneParams: SceneParams) {
+    private fun renderImpl(item: RenderItem, renderer: IRenderer, renderParams: RenderParams, sceneParams: SceneParams, parent: RenderItem? = null) {
         val drawer = shaderRepo!![item.shaderTypeId]
 
         val animationsToRemove = arrayListOf<IGLAnimation>()
-        item.animations?.forEach {
+        item.animations?.toList()?.forEach {
             if (!it.isInitialized) it.initialize(item, renderParams, sceneParams)
             it.transform(item, renderParams, sceneParams)
 
-            if (it is IGLFinishableAnimation && it.isFinished)
+            if (it is IGLCompletableAnimation && it.isComplete)
                 animationsToRemove.add(it)
         }
         animationsToRemove.forEach { item.removeAnimation(it) }
@@ -61,13 +60,13 @@ class RenderUnit : RenderItem(), IRenderUnit {
         } else GLES20.glDisable(GLES20.GL_BLEND)
 
         if (drawer != null) {
-            drawer.draw(this, sceneParams, item.itemParams)
+            drawer.draw(this, sceneParams, item.itemParams, parent?.itemParams)
             drawer.cleanUniforms()
         }
 
-        if (item.childs != null)
-            for (c in item.childs!!)
-                renderImpl(c, renderer, renderParams, sceneParams)
+        item.childs?.toList()?.forEach {
+            renderImpl(it, renderer, renderParams, sceneParams, item)
+        }
     }
 
     override fun prerender(renderer: IRenderer) {

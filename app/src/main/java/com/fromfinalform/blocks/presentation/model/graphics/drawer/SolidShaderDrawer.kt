@@ -5,7 +5,6 @@
 
 package com.fromfinalform.blocks.presentation.model.graphics.drawer
 
-import android.graphics.PointF
 import android.graphics.RectF
 import android.opengl.GLES20
 import com.fromfinalform.blocks.presentation.model.graphics.common.rotateMesh
@@ -33,7 +32,8 @@ class SolidShaderDrawer() : IShaderDrawer {
         """
 
     override val FRAGMENT_SHADER = """
-        precision mediump float;
+        /*precision mediump float;*/
+        precision highp float;
         uniform vec4 uColor;
         
         void main() {
@@ -109,13 +109,21 @@ class SolidShaderDrawer() : IShaderDrawer {
         this.color = GLColor.BLACK
     }
 
-    override fun draw(ru: IRenderUnit, sceneParams: SceneParams, itemParams: ItemParams) {
+    private fun rotateBy(itemParams: ItemParams?, sceneParams: SceneParams) {
+        if (itemParams == null)
+            return
+
+        if (itemParams.angle % 360 != 0f)
+            rotateMesh(vertexBuffer, 0, bufferIndex, itemParams.angle, itemParams.anglePivot, sceneParams.sceneWH, VERTEX_SIZE)
+    }
+
+    override fun draw(ru: IRenderUnit, sceneParams: SceneParams, itemParams: ItemParams, parentParams: ItemParams?) {
         GLES20.glUseProgram(program)
 
         refreshMesh(itemParams.dstRect, sceneParams)
 
-        if (itemParams.angle % 360 != 0f)
-            rotateMesh(vertexBuffer, 0, bufferIndex, itemParams.angle, itemParams.dstPivot, sceneParams.sceneWH, VERTEX_SIZE)
+        rotateBy(parentParams, sceneParams)
+        rotateBy(itemParams, sceneParams)
 
         vertices.setVertices(vertexBuffer, 0, bufferIndex)
         vertices.bind()

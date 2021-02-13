@@ -19,5 +19,5 @@ interface IShaderDrawer {
     fun setUniforms(vararg args: Any)
     fun cleanUniforms()
 
-    fun draw(ru: IRenderUnit, sceneParams: SceneParams, itemParams: ItemParams)
+    fun draw(ru: IRenderUnit, sceneParams: SceneParams, itemParams: ItemParams, parentParams: ItemParams? = null)
 }

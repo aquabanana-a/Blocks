@@ -5,7 +5,6 @@
 
 package com.fromfinalform.blocks.presentation.model.graphics.drawer
 
-import android.graphics.PointF
 import android.graphics.RectF
 import android.opengl.GLES20
 import com.fromfinalform.blocks.common.clone
@@ -229,7 +228,7 @@ class GradientShaderDrawer() : IShaderDrawer {
         this.clipBuffer = FloatArray(10) { 0f }
     }
 
-    override fun draw(ru: IRenderUnit, sceneParams: SceneParams, itemParams: ItemParams) {
+    override fun draw(ru: IRenderUnit, sceneParams: SceneParams, itemParams: ItemParams, parentParams: ItemParams?) {
         GLES20.glUseProgram(program)
 
         refreshMesh(itemParams.dstRect, sceneParams)
@@ -237,8 +236,8 @@ class GradientShaderDrawer() : IShaderDrawer {
 
         val bga = background.angle + itemParams.angle
         if (bga % 360 != 0f) {
-            rotateMesh(clipBuffer, 0, 8, itemParams.angle, itemParams.dstPivot, sceneParams.sceneWH, 2)
-            rotateMesh(vertexBuffer, 0, bufferIndex, bga, itemParams.dstPivot, sceneParams.sceneWH, VERTEX_SIZE)
+            rotateMesh(clipBuffer, 0, 8, itemParams.angle, itemParams.anglePivot, sceneParams.sceneWH, 2)
+            rotateMesh(vertexBuffer, 0, bufferIndex, bga, itemParams.anglePivot, sceneParams.sceneWH, VERTEX_SIZE)
         }
 
         GLES20.glUniform2fv(clipHandle, 5, clipBuffer, 0)
