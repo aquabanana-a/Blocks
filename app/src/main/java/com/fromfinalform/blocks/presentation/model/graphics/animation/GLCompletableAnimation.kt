@@ -13,14 +13,13 @@ import java.lang.IllegalStateException
 
 abstract class GLCompletableAnimation<T>(
     val startTimeMs: Long,
-    val speed: Float,
     val interpolator: Interpolator) : IGLCompletableAnimation {
 
     override var isInitialized = false; protected set
     override var isComplete = false; protected set
 
-    var endTimeMs: Long = startTimeMs; protected set
-    var durationMs: Long = 0L; protected set
+    open var endTimeMs: Long = startTimeMs; protected set
+    open var durationMs: Long = 0L; protected set
 
     final override fun initialize(item: RenderItem, renderParams: RenderParams, sceneParams: SceneParams) {
         if (isInitialized)

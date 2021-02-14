@@ -31,9 +31,11 @@ class BlockBuilder(val config: IGameConfig) {
         ret.color = blockTypeRepo[typeId].bgColor
 
         ret.childs = arrayListOf(GameObject().apply {
-            width = ret.width
-            height = ret.height
-            textStyle = TextStyle(typeId.toString(), 28f, R.font.jura_bold, 0xFFFFFFFF, 0x00000000).withInnerGravity(Gravity.CENTER)
+            x = ret.width / 2
+            y = ret.height / 2
+            width = ret.width/2
+            height = ret.height/2
+            textStyle = TextStyle(typeId.toString(), 28f, R.font.jura_bold, 0xFFFFFFFF, 0xFFFF0000).withInnerGravity(Gravity.CENTER)
         })
 
         return ret

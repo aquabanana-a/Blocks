@@ -16,8 +16,8 @@ import kotlin.math.floor
 import kotlin.math.pow
 import kotlin.math.sqrt
 
-class TranslateTo(val destXY: PointF, speed: Float, startTimeMs: Long, interpolator: Interpolator = LinearInterpolator())
-    : GLCompletableAnimation<TranslateTo>(startTimeMs, speed, interpolator) {
+class TranslateTo(val destXY: PointF, val speed: Float, startTimeMs: Long = 0L, interpolator: Interpolator = LinearInterpolator())
+    : GLCompletableAnimation<TranslateTo>(startTimeMs, interpolator) {
 
     private var valueTransformed: Float = 0f
     private var distanceX = 0f

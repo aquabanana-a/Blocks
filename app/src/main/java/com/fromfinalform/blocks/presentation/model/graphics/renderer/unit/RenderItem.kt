@@ -103,6 +103,33 @@ open class RenderItem(
         return this
     } }
 
+    fun scaleX(factor: Float): RenderItem { synchronized(lo) {
+        val dw = width*(factor - 1)
+        this.x -= dw / 2f
+        this.width += dw
+        this.childs?.forEach { c -> c.scaleX(factor) }
+        return this
+    } }
+
+    fun scaleY(factor: Float): RenderItem { synchronized(lo) {
+        val dh = height * (factor - 1)
+        this.y += dh / 2f
+        this.height += dh
+        this.childs?.forEach { c -> c.scaleY(factor) }
+        return this
+    } }
+
+    fun scaleXY(factor: Float): RenderItem { synchronized(lo) {
+        val dw = width * (factor - 1)
+        val dh = height * (factor - 1)
+        this.x -= dw / 2f
+        this.y += dh / 2f
+        this.width += dw
+        this.height += dh
+        this.childs?.forEach { c -> c.scaleXY(factor) }
+        return this
+    } }
+
     fun addChild(value: RenderItem) { synchronized(lo) {
         if(this.childs == null)
             this.childs = ArrayList()

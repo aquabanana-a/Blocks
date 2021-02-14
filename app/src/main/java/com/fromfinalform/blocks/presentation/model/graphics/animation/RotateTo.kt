@@ -12,8 +12,8 @@ import com.fromfinalform.blocks.presentation.model.graphics.renderer.SceneParams
 import com.fromfinalform.blocks.presentation.model.graphics.renderer.unit.RenderItem
 import kotlin.math.floor
 
-class RotateTo(val destAngle: Float, speed: Float, startTimeMs: Long, interpolator: Interpolator = LinearInterpolator())
-    : GLCompletableAnimation<RotateTo>(startTimeMs, speed, interpolator) {
+class RotateTo(val destAngle: Float, val speed: Float, startTimeMs: Long = 0L, interpolator: Interpolator = LinearInterpolator())
+    : GLCompletableAnimation<RotateTo>(startTimeMs, interpolator) {
 
     private var valueTransformed: Float = 0f
     private var delta = 0f
