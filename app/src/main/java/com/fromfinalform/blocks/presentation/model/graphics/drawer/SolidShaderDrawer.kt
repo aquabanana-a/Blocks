@@ -14,6 +14,7 @@ import com.fromfinalform.blocks.presentation.model.graphics.renderer.data.GLColo
 import com.fromfinalform.blocks.presentation.model.graphics.renderer.data.GLVertices
 import com.fromfinalform.blocks.presentation.model.graphics.renderer.unit.IRenderUnit
 import com.fromfinalform.blocks.presentation.model.graphics.renderer.unit.ItemParams
+import kotlin.math.min
 
 class SolidShaderDrawer() : IShaderDrawer {
     companion object {
@@ -47,6 +48,7 @@ class SolidShaderDrawer() : IShaderDrawer {
     private var vertices: GLVertices
     private var vertexBuffer: FloatArray
     private var bufferIndex = 0
+    private var alpha = 1f
 
     private var positionHandle = -1
     private var colorHandle = -1
@@ -80,6 +82,8 @@ class SolidShaderDrawer() : IShaderDrawer {
     }
 
     private fun refreshMesh(dst: RectF, params: SceneParams) {
+        val c = color.clone().mulBy(min(color.getA(), alpha))
+
         bufferIndex = 0
         vertexBuffer[bufferIndex++] = dst.left
         vertexBuffer[bufferIndex++] = dst.top
@@ -93,7 +97,7 @@ class SolidShaderDrawer() : IShaderDrawer {
         vertexBuffer[bufferIndex++] = dst.right
         vertexBuffer[bufferIndex++] = dst.bottom
 
-        GLES20.glUniform4f(colorHandle, color.getR(), color.getG(), color.getB(), color.getA())
+        GLES20.glUniform4f(colorHandle, c.getR(), c.getG(), c.getB(), c.getA())
     }
 
     var color: GLColor = GLColor.BLACK; private set
@@ -107,6 +111,7 @@ class SolidShaderDrawer() : IShaderDrawer {
 
     override fun cleanUniforms() {
         this.color = GLColor.BLACK
+        this.alpha = 1f
     }
 
     private fun rotateBy(itemParams: ItemParams?, sceneParams: SceneParams) {
@@ -120,6 +125,7 @@ class SolidShaderDrawer() : IShaderDrawer {
     override fun draw(ru: IRenderUnit, sceneParams: SceneParams, itemParams: ItemParams, parentParams: ItemParams?) {
         GLES20.glUseProgram(program)
 
+        this.alpha = itemParams.alpha
         refreshMesh(itemParams.dstRect, sceneParams)
 
         rotateBy(parentParams, sceneParams)

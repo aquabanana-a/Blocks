@@ -12,7 +12,7 @@ import com.fromfinalform.blocks.presentation.model.graphics.renderer.unit.Render
 import java.lang.IllegalStateException
 
 abstract class GLCompletableAnimation<T>(
-    val startTimeMs: Long,
+    var startTimeMs: Long,
     val interpolator: Interpolator) : IGLCompletableAnimation {
 
     override var isInitialized = false; protected set
@@ -25,6 +25,7 @@ abstract class GLCompletableAnimation<T>(
         if (isInitialized)
             return
 
+        startTimeMs += renderParams.timeMs
         endTimeMs = prepare(item, renderParams, sceneParams)
         if (endTimeMs < startTimeMs)
             throw IllegalStateException()

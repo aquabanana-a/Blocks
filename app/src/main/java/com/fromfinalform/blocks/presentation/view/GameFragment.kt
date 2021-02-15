@@ -15,9 +15,7 @@ import android.view.animation.LinearInterpolator
 import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
 import com.fromfinalform.blocks.R
-import com.fromfinalform.blocks.presentation.model.graphics.animation.RotateTo
-import com.fromfinalform.blocks.presentation.model.graphics.animation.ScaleXY
-import com.fromfinalform.blocks.presentation.model.graphics.animation.TranslateTo
+import com.fromfinalform.blocks.presentation.model.graphics.animation.*
 import com.fromfinalform.blocks.presentation.model.graphics.interpolator.BounceInterpolator
 import com.fromfinalform.blocks.presentation.model.graphics.opengl.EGL10ContextFactory
 import com.fromfinalform.blocks.presentation.model.graphics.renderer.SceneParams
@@ -64,14 +62,18 @@ class GameFragment : MvpAppCompatFragment(), GamePresenter.GameView {
         vRoot.findViewById<View>(R.id.btn_start).setOnClickListener {
             //it.findNavController().navigate(GameFragmentDirections.actionGameFragmentToScoreFragment())
 
-//            presenter.ru2!!.withLocation(-1f, 1f)
-//            presenter.ru2!!.addAnimation(TranslateTo(PointF(0f, 0f), 0.0005f, presenter.renderer.renderTimeMs + 100, BounceInterpolator()))
-//            presenter.ru2!!.addAnimation(RotateTo(presenter.ru2!!.itemParams.angle + 900, 0.1f, presenter.renderer.renderTimeMs + 100, BounceInterpolator()))
+            presenter.ru2!!.withLocation(-1f, 1f)
+            presenter.ru2!!.addAnimation(Alpha(1f, 0f, 500, interpolator = LinearInterpolator()))
+            presenter.ru2!!.addAnimation(TranslateTo(PointF(0f, 0f), 0.0005f, interpolator =  BounceInterpolator()))
+            presenter.ru2!!.addAnimation(RotateBy(900f, 0.1f, interpolator = BounceInterpolator()))
 
-            presenter.ru2!!.withLocation(0f, 0f)
-            presenter.ru2!!.addAnimation(ScaleXY(1f, 2f, 1f, 2f, 4000, presenter.renderer.renderTimeMs + 100, LinearInterpolator())
-                .withPivot(ScaleXY.Pivot.Corner_BR)
-                .withAffectChilds())
+//            presenter.ru2!!.withLocation(0f, 0f)
+//            presenter.ru2!!.addAnimation(ScaleXY(1f, 2f, 1f, 2f, 4000, interpolator = LinearInterpolator())
+//                .withPivot(ScaleXY.Pivot.CenterRight)
+//                .withAffectChilds())
+
+//            presenter.ru2!!.withLocation(0f, 0f)
+//            presenter.ru2!!.addAnimation(Alpha(0f, 1f, 2000, interpolator = LinearInterpolator()))
         }
 
         vRoot.findViewById<View>(R.id.btn_stop).setOnClickListener {

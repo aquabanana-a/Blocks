@@ -305,6 +305,7 @@ class TextShaderDrawer : IShaderDrawer, ISpriteDrawer {
         this.sceneParams = sceneParams
         this.itemParams = itemParams
         this.parentParams = parentParams
+        this.alpha = itemParams.alpha
 
         GLES20.glUseProgram(program)
 

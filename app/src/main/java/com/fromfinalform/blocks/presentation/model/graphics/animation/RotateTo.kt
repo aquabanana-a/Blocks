@@ -12,11 +12,11 @@ import com.fromfinalform.blocks.presentation.model.graphics.renderer.SceneParams
 import com.fromfinalform.blocks.presentation.model.graphics.renderer.unit.RenderItem
 import kotlin.math.floor
 
-class RotateTo(val destAngle: Float, val speed: Float, startTimeMs: Long = 0L, interpolator: Interpolator = LinearInterpolator())
+open class RotateTo(var destAngle: Float, val speed: Float, startTimeMs: Long = 0L, interpolator: Interpolator = LinearInterpolator())
     : GLCompletableAnimation<RotateTo>(startTimeMs, interpolator) {
 
     private var valueTransformed: Float = 0f
-    private var delta = 0f
+    protected open var delta = 0f
 
     override fun prepare(item: RenderItem, renderParams: RenderParams, sceneParams: SceneParams): Long {
         delta = destAngle - item.rotation

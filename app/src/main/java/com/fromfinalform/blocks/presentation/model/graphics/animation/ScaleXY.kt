@@ -13,7 +13,7 @@ import com.fromfinalform.blocks.presentation.model.graphics.renderer.SceneParams
 import com.fromfinalform.blocks.presentation.model.graphics.renderer.unit.RenderItem
 import kotlin.math.floor
 
-class ScaleXY(
+open class ScaleXY(
     val xScaleStart: Float,
     val xScaleEnd: Float,
     val yScaleStart: Float,
@@ -29,8 +29,10 @@ class ScaleXY(
     var pivot = Pivot.Center; private set
     enum class Pivot {
         Center,
-        CenterBottom,
+        CenterLeft,
         CenterTop,
+        CenterRight,
+        CenterBottom,
         Corner_TL,
         Corner_TR,
         Corner_BL,
@@ -48,7 +50,6 @@ class ScaleXY(
     }
 
     override fun prepare(item: RenderItem, renderParams: RenderParams, sceneParams: SceneParams): Long {
-
         return startTimeMs + durationMs
     }
 
@@ -104,15 +105,25 @@ class ScaleXY(
                     top = (sumy + height) * .5f
                     bottom = (sumy - height) * .5f
                 }
-                Pivot.CenterBottom -> {
-                    left = (sumx - width) * .5f
-                    right = (sumx + width) * .5f
-                    top = bottom + heightDstScaled
+                Pivot.CenterLeft -> {
+                    right = left + widthDstScaled
+                    top = (sumy + height) * .5f
+                    bottom = (sumy - height) * .5f
                 }
                 Pivot.CenterTop -> {
                     left = (sumx - width) * .5f
                     right = (sumx + width) * .5f
                     bottom = top - heightDstScaled
+                }
+                Pivot.CenterRight -> {
+                    left = right - widthDstScaled
+                    top = (sumy + height) * .5f
+                    bottom = (sumy - height) * .5f
+                }
+                Pivot.CenterBottom -> {
+                    left = (sumx - width) * .5f
+                    right = (sumx + width) * .5f
+                    top = bottom + heightDstScaled
                 }
                 Pivot.Corner_TL -> {
                     right = left + widthDstScaled

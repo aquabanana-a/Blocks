@@ -38,9 +38,11 @@ class FlatShaderDrawer() : IShaderDrawer {
         precision highp float;
         varying vec2 vTextureCoord;
         uniform sampler2D sTexture;
+        uniform float uAlpha;
         
         void main() {
-            gl_FragColor = texture2D(sTexture, vTextureCoord);
+            vec4 color = texture2D(sTexture, vTextureCoord);
+            gl_FragColor = color * uAlpha;
         }
         """
 
@@ -50,9 +52,11 @@ class FlatShaderDrawer() : IShaderDrawer {
     private var vertices: GLVertices
     private var vertexBuffer: FloatArray
     private var bufferIndex = 0
+    private var alpha = 1f
 
     private var positionHandle = -1
     private var textureHandle = -1
+    private var alphaHandle = -1
 
     var textureId: Int = -1; private set
 
@@ -63,6 +67,7 @@ class FlatShaderDrawer() : IShaderDrawer {
 
         positionHandle = GLES20.glGetAttribLocation(program, "aPosition")
         textureHandle = GLES20.glGetAttribLocation(program, "aTextureCoord")
+        alphaHandle = GLES20.glGetUniformLocation(program, "uAlpha")
 
         this.vertices = GLVertices(VERTICES_PER_SPRITE, INDICES_PER_SPRITE, positionHandle, textureHandle, -1)
         this.vertexBuffer = FloatArray(VERTICES_PER_SPRITE * VERTEX_SIZE)
@@ -116,6 +121,7 @@ class FlatShaderDrawer() : IShaderDrawer {
 
     override fun cleanUniforms() {
         this.textureId = -1
+        this.alpha = 1f
     }
 
     private fun rotateBy(itemParams: ItemParams?, sceneParams: SceneParams) {
@@ -130,10 +136,13 @@ class FlatShaderDrawer() : IShaderDrawer {
         if (textureId < 0)
             return
 
+        this.alpha = itemParams.alpha
+
         GLES20.glUseProgram(program)
 
         GLES20.glActiveTexture(GLES20.GL_TEXTURE0)
         GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, textureId)
+        GLES20.glUniform1f(alphaHandle, alpha)
 
         refreshMesh(itemParams.dstRect, itemParams.srcRect, sceneParams)
 

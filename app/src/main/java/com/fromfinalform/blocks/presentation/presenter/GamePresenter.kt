@@ -106,9 +106,10 @@ class GamePresenter : MvpPresenter<GamePresenter.GameView>(), LifecycleObserver 
 
                     go = BlockBuilder(config).withTypeId(BlockTypeId._128).build()
 //                    go!!.translateX(config.blockGapHPx)
-                    go!!.translateX(config.fieldWidthPx / 2)
-                    go!!.translateY(config.fieldHeightPx / 2)
+//                    go!!.translateX(config.fieldWidthPx / 2)
+//                    go!!.translateY(config.fieldHeightPx / 2)
                     ru2 = go!!.toRenderUnit(sceneParams)
+                    ru2!!.translateXY(0f, 0f)
 
                     pt = PointF(ru2!!.x, ru2!!.y)
 

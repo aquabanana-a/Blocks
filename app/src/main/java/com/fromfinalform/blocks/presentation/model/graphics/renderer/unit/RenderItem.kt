@@ -42,6 +42,9 @@ open class RenderItem(
                          itemParams.dstRect.bottom = y - v
                          itemParams.anglePivot.y -= dh / 2 }
 
+    var alpha   get()  = itemParams.alpha
+                set(v) { itemParams.alpha = v }
+
     var rotation get()  = itemParams.angle
                  set(v) { itemParams.angle = v }
 
@@ -97,6 +100,18 @@ open class RenderItem(
         this.translateY(times * height)
         return this
     }
+
+    fun alphaSet(value: Float): RenderItem { synchronized(lo) {
+        this.alpha = value
+        this.childs?.forEach { it.alphaSet(value) }
+        return this
+    } }
+
+    fun alphaMul(value: Float): RenderItem { synchronized(lo) {
+        this.alpha *= value
+        this.childs?.forEach { it.alphaMul(value) }
+        return this
+    } }
 
     fun rotate(dA: Float): RenderItem { synchronized(lo) {
         this.rotation += dA

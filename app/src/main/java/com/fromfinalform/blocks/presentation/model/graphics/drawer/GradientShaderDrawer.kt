@@ -73,6 +73,7 @@ class GradientShaderDrawer() : IShaderDrawer {
     private var vertexBuffer: FloatArray
     private var clipBuffer: FloatArray
     private var bufferIndex = 0
+    private var alpha = 1f
 
     private var positionHandle = -1
     private var colorHandle = -1
@@ -226,10 +227,13 @@ class GradientShaderDrawer() : IShaderDrawer {
     override fun cleanUniforms() {
         this.background = GLGradient.TRANSPARENT
         this.clipBuffer = FloatArray(10) { 0f }
+        this.alpha = 1f
     }
 
     override fun draw(ru: IRenderUnit, sceneParams: SceneParams, itemParams: ItemParams, parentParams: ItemParams?) {
         GLES20.glUseProgram(program)
+
+        this.alpha = itemParams.alpha
 
         refreshMesh(itemParams.dstRect, sceneParams)
         fillClipBuffer(itemParams.dstRect)
