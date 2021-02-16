@@ -5,6 +5,11 @@
 
 package com.fromfinalform.blocks.presentation.model.graphics.animation
 
+import com.fromfinalform.blocks.presentation.model.graphics.renderer.RenderParams
+import com.fromfinalform.blocks.presentation.model.graphics.renderer.SceneParams
+import com.fromfinalform.blocks.presentation.model.graphics.renderer.unit.RenderItem
+
 interface IGLCompletableAnimation : IGLAnimation {
     val isComplete: Boolean
+    val completeHandler: ((renderItem: RenderItem, renderParams: RenderParams, sceneParams: SceneParams) -> Unit)?
 }

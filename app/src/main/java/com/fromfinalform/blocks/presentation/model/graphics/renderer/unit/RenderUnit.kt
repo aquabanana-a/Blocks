@@ -16,6 +16,7 @@ import com.fromfinalform.blocks.presentation.model.graphics.renderer.SceneParams
 import com.fromfinalform.blocks.presentation.model.graphics.renderer.data.GLColor
 import com.fromfinalform.blocks.presentation.model.graphics.renderer.data.GLGradient
 import io.instories.core.render.resolver.GLTextResolver
+import kotlinx.coroutines.launch
 
 class RenderUnit : RenderItem(), IRenderUnit {
 
@@ -36,7 +37,7 @@ class RenderUnit : RenderItem(), IRenderUnit {
     private fun renderImpl(item: RenderItem, renderer: IRenderer, renderParams: RenderParams, sceneParams: SceneParams, parent: RenderItem? = null) {
         val drawer = shaderRepo!![item.shaderTypeId]
 
-        val animationsToRemove = arrayListOf<IGLAnimation>()
+        val animationsToRemove = arrayListOf<IGLCompletableAnimation>()
         item.animations?.toList()?.forEach {
             if (!it.isInitialized) it.initialize(item, renderParams, sceneParams)
             it.transform(item, renderParams, sceneParams)
@@ -44,7 +45,11 @@ class RenderUnit : RenderItem(), IRenderUnit {
             if (it is IGLCompletableAnimation && it.isComplete)
                 animationsToRemove.add(it)
         }
-        animationsToRemove.forEach { item.removeAnimation(it) }
+
+        if (animationsToRemove.size > 0) {
+            animationsToRemove.forEach { item.removeAnimation(it) }
+            renderer.scope.launch { animationsToRemove.forEach { it.completeHandler?.invoke(item, renderParams, sceneParams) } }
+        }
 
         when (item.shaderTypeId) {
             ShaderDrawerTypeId.SOLID    -> drawer!!.setUniforms(GLColor(item.color))

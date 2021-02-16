@@ -3,7 +3,7 @@
  * Copyright (c) 2021. All rights reserved.
  */
 
-package com.fromfinalform.blocks.domain.model.block
+package com.fromfinalform.blocks.domain.model.game.`object`.block
 
 class BlockType(val id: BlockTypeId, val bgColor: Long, val txtColor: Long) {
 }

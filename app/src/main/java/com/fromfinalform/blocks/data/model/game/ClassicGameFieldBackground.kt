@@ -6,8 +6,8 @@
 package com.fromfinalform.blocks.data.model.game
 
 import com.fromfinalform.blocks.R
-import com.fromfinalform.blocks.domain.model.game.GameObject
-import com.fromfinalform.blocks.domain.model.game.IGameConfig
+import com.fromfinalform.blocks.domain.model.game.`object`.GameObject
+import com.fromfinalform.blocks.domain.model.game.configuration.IGameConfig
 import com.fromfinalform.blocks.domain.model.game.IGameFieldBackground
 
 class ClassicGameFieldBackground : IGameFieldBackground {

@@ -11,12 +11,15 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.OnLifecycleEvent
-import com.fromfinalform.blocks.data.model.game.ClassicGameConfig
+import com.fromfinalform.blocks.domain.model.game.mode.classic.ClassicGameConfig
 import com.fromfinalform.blocks.data.model.game.ClassicGameFieldBackground
 import com.fromfinalform.blocks.domain.interactor.BlockBuilder
-import com.fromfinalform.blocks.domain.model.block.BlockTypeId
-import com.fromfinalform.blocks.domain.model.game.GameObject
-import com.fromfinalform.blocks.domain.model.game.IGameConfig
+import com.fromfinalform.blocks.domain.model.game.IGameLooper
+import com.fromfinalform.blocks.domain.model.game.`object`.block.BlockTypeId
+import com.fromfinalform.blocks.domain.model.game.`object`.GameObject
+import com.fromfinalform.blocks.domain.model.game.configuration.IGameConfig
+import com.fromfinalform.blocks.presentation.dagger.DaggerGameComponent
+import com.fromfinalform.blocks.presentation.dagger.GameComponent
 import com.fromfinalform.blocks.presentation.mapper.GraphicsMapper.Companion.toRenderUnit
 import com.fromfinalform.blocks.presentation.model.graphics.renderer.*
 import com.fromfinalform.blocks.presentation.model.graphics.renderer.unit.RenderUnit
@@ -29,6 +32,7 @@ import moxy.MvpPresenter
 import moxy.MvpView
 import moxy.viewstate.strategy.AddToEndSingleStrategy
 import moxy.viewstate.strategy.StateStrategyType
+import javax.inject.Inject
 
 @InjectViewState
 class GamePresenter : MvpPresenter<GamePresenter.GameView>(), LifecycleObserver {
@@ -41,6 +45,8 @@ class GamePresenter : MvpPresenter<GamePresenter.GameView>(), LifecycleObserver 
     }
 
     val renderer: IRenderer get() = glViewRenderer
+    private lateinit var gameComponent: GameComponent
+    @Inject lateinit var gameLooper: IGameLooper
 
     private lateinit var glViewRenderer: ViewRenderer
     private /*lateinit*/ var config: IGameConfig = ClassicGameConfig()
@@ -54,6 +60,9 @@ class GamePresenter : MvpPresenter<GamePresenter.GameView>(), LifecycleObserver 
 
     @OnLifecycleEvent(Lifecycle.Event.ON_CREATE)
     private fun onCreate(owner: LifecycleOwner) {
+        gameComponent = DaggerGameComponent.create()
+        gameComponent.injectGamePresenter(this)
+
         glViewRenderer = ViewRenderer(0xFF20242F, Size(config.fieldWidthPx, config.fieldHeightPx))
             .withUpdater { viewState.requestRender() }
             .withListener(object : RendererListener {

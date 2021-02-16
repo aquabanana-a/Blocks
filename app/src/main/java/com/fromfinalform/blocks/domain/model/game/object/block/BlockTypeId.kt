@@ -3,7 +3,7 @@
  * Copyright (c) 2021. All rights reserved.
  */
 
-package com.fromfinalform.blocks.domain.model.block
+package com.fromfinalform.blocks.domain.model.game.`object`.block
 
 enum class BlockTypeId(val id: Int) {
     _2      (1)     { override fun toString() = "2" },

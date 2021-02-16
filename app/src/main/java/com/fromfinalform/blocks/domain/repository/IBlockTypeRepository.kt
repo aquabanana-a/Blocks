@@ -5,8 +5,8 @@
 
 package com.fromfinalform.blocks.domain.repository
 
-import com.fromfinalform.blocks.domain.model.block.BlockType
-import com.fromfinalform.blocks.domain.model.block.BlockTypeId
+import com.fromfinalform.blocks.domain.model.game.`object`.block.BlockType
+import com.fromfinalform.blocks.domain.model.game.`object`.block.BlockTypeId
 
 interface IBlockTypeRepository {
     fun initialize()

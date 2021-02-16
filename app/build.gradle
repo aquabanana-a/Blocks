@@ -60,6 +60,7 @@ sourceSets {
 def rx = '3.0.10'
 def rxa = '3.0.0'
 def moxy = '2.2.1'
+def dagger = '2.29.1'
 
 dependencies {
 
@@ -84,6 +85,9 @@ dependencies {
 
     api "io.reactivex.rxjava3:rxandroid:$rxa"
     api "io.reactivex.rxjava3:rxjava:$rx"
+
+    kapt "com.google.dagger:dagger-compiler:$dagger"
+    implementation "com.google.dagger:dagger:$dagger"
 
     implementation 'com.vdurmont:emoji-java:5.1.1'
 }

@@ -7,8 +7,11 @@ package com.fromfinalform.blocks.presentation.model.graphics.renderer
 
 import android.opengl.GLSurfaceView
 import com.fromfinalform.blocks.presentation.model.graphics.renderer.unit.IRenderUnit
+import kotlinx.coroutines.CoroutineScope
 
 interface IRenderer : GLSurfaceView.Renderer {
+    val scope: CoroutineScope
+
     val sceneSize: ISize
     val renderTimeMs: Long
 

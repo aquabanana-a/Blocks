@@ -21,6 +21,12 @@ abstract class GLCompletableAnimation<T>(
     open var endTimeMs: Long = startTimeMs; protected set
     open var durationMs: Long = 0L; protected set
 
+    final override var completeHandler: ((renderItem: RenderItem, renderParams: RenderParams, sceneParams: SceneParams) -> Unit)?= null
+    fun withOnComplete(value: ((renderItem: RenderItem, renderParams: RenderParams, sceneParams: SceneParams) -> Unit)?): IGLCompletableAnimation {
+        this.completeHandler = value
+        return this
+    }
+
     final override fun initialize(item: RenderItem, renderParams: RenderParams, sceneParams: SceneParams) {
         if (isInitialized)
             return

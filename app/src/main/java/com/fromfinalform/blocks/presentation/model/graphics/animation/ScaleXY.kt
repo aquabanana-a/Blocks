@@ -207,5 +207,6 @@ open class ScaleXY(
         return ScaleXY(xScaleStart, xScaleEnd, yScaleStart, yScaleEnd, durationMs, startTimeMs, interpolator)
             .withPivot(pivot)
             .withAffectChilds(affectChilds)
+            .withOnComplete(completeHandler) as ScaleXY
     }
 }

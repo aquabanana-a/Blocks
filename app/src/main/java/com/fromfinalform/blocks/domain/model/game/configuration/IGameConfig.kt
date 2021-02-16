@@ -3,7 +3,7 @@
  * Copyright (c) 2021. All rights reserved.
  */
 
-package com.fromfinalform.blocks.domain.model.game
+package com.fromfinalform.blocks.domain.model.game.configuration
 
 interface IGameConfig {
     val blockWidthPx: Float // width/height in pixels

@@ -5,19 +5,19 @@
 
 package com.fromfinalform.blocks.data.repository
 
-import com.fromfinalform.blocks.domain.model.block.BlockType
-import com.fromfinalform.blocks.domain.model.block.BlockTypeId
-import com.fromfinalform.blocks.domain.model.block.BlockTypeId._2
-import com.fromfinalform.blocks.domain.model.block.BlockTypeId._4
-import com.fromfinalform.blocks.domain.model.block.BlockTypeId._8
-import com.fromfinalform.blocks.domain.model.block.BlockTypeId._16
-import com.fromfinalform.blocks.domain.model.block.BlockTypeId._32
-import com.fromfinalform.blocks.domain.model.block.BlockTypeId._64
-import com.fromfinalform.blocks.domain.model.block.BlockTypeId._128
-import com.fromfinalform.blocks.domain.model.block.BlockTypeId._256
-import com.fromfinalform.blocks.domain.model.block.BlockTypeId._512
-import com.fromfinalform.blocks.domain.model.block.BlockTypeId._1024
-import com.fromfinalform.blocks.domain.model.block.BlockTypeId._2048
+import com.fromfinalform.blocks.domain.model.game.`object`.block.BlockType
+import com.fromfinalform.blocks.domain.model.game.`object`.block.BlockTypeId
+import com.fromfinalform.blocks.domain.model.game.`object`.block.BlockTypeId._2
+import com.fromfinalform.blocks.domain.model.game.`object`.block.BlockTypeId._4
+import com.fromfinalform.blocks.domain.model.game.`object`.block.BlockTypeId._8
+import com.fromfinalform.blocks.domain.model.game.`object`.block.BlockTypeId._16
+import com.fromfinalform.blocks.domain.model.game.`object`.block.BlockTypeId._32
+import com.fromfinalform.blocks.domain.model.game.`object`.block.BlockTypeId._64
+import com.fromfinalform.blocks.domain.model.game.`object`.block.BlockTypeId._128
+import com.fromfinalform.blocks.domain.model.game.`object`.block.BlockTypeId._256
+import com.fromfinalform.blocks.domain.model.game.`object`.block.BlockTypeId._512
+import com.fromfinalform.blocks.domain.model.game.`object`.block.BlockTypeId._1024
+import com.fromfinalform.blocks.domain.model.game.`object`.block.BlockTypeId._2048
 import com.fromfinalform.blocks.domain.repository.IBlockTypeRepository
 
 class ClassicBlockTypeRepository : IBlockTypeRepository {

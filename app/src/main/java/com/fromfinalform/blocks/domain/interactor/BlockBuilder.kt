@@ -8,10 +8,10 @@ package com.fromfinalform.blocks.domain.interactor
 import android.view.Gravity
 import com.fromfinalform.blocks.R
 import com.fromfinalform.blocks.data.repository.ClassicBlockTypeRepository
-import com.fromfinalform.blocks.domain.model.block.Block
-import com.fromfinalform.blocks.domain.model.block.BlockTypeId
-import com.fromfinalform.blocks.domain.model.game.GameObject
-import com.fromfinalform.blocks.domain.model.game.IGameConfig
+import com.fromfinalform.blocks.domain.model.game.`object`.block.Block
+import com.fromfinalform.blocks.domain.model.game.`object`.block.BlockTypeId
+import com.fromfinalform.blocks.domain.model.game.`object`.GameObject
+import com.fromfinalform.blocks.domain.model.game.configuration.IGameConfig
 import com.fromfinalform.blocks.presentation.model.graphics.text.TextStyle
 
 class BlockBuilder(val config: IGameConfig) {

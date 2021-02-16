@@ -1,12 +1,11 @@
 /*
- * Created by S.Dobranos on 07.02.21 21:39
+ * Created by S.Dobranos on 16.02.21 21:21
  * Copyright (c) 2021. All rights reserved.
  */
 
-package com.fromfinalform.blocks.domain.model.game
+package com.fromfinalform.blocks.domain.model.game.`object`
 
 import com.fromfinalform.blocks.common.ICloneable
-import com.fromfinalform.blocks.presentation.model.graphics.renderer.unit.RenderItem
 import com.fromfinalform.blocks.presentation.model.graphics.text.TextStyle
 
 open class GameObject(val id: Long = GameObjectIndexer.getNext()) : ICloneable<GameObject> {

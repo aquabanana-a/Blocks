@@ -1,13 +1,16 @@
 /*
- * Created by S.Dobranos on 05.02.21 20:01
+ * Created by S.Dobranos on 16.02.21 21:15
  * Copyright (c) 2021. All rights reserved.
  */
 
-package com.fromfinalform.blocks.data.model.game
+package com.fromfinalform.blocks.domain.model.game.mode.classic
 
-import com.fromfinalform.blocks.domain.model.game.IGameConfig
+import com.fromfinalform.blocks.domain.model.game.configuration.IGameConfig
+import javax.inject.Inject
 
 class ClassicGameConfig : IGameConfig {
+
+    @Inject constructor()
 
     override val blockWidthPx get() = 100f
     override val blockHeightPx get() = 100f
@@ -20,7 +23,4 @@ class ClassicGameConfig : IGameConfig {
     override val fieldWidthPx get() = blockWidthPx * fieldWidth + blockGapHPx * (fieldWidth + 1)
     override val fieldHeightPx get() = blockHeightPx * fieldHeight + blockGapVPx * (fieldHeight + 1)
 
-//    @Inject constructor() {
-//
-//    }
 }

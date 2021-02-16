@@ -3,10 +3,10 @@
  * Copyright (c) 2021. All rights reserved.
  */
 
-package com.fromfinalform.blocks.domain.model.block
+package com.fromfinalform.blocks.domain.model.game.`object`.block
 
-import com.fromfinalform.blocks.domain.model.game.GameObject
-import com.fromfinalform.blocks.domain.model.game.GameObjectIndexer
+import com.fromfinalform.blocks.domain.model.game.`object`.GameObject
+import com.fromfinalform.blocks.domain.model.game.`object`.GameObjectIndexer
 
 class Block(val typeId: BlockTypeId, id: Long = GameObjectIndexer.getNext()) : GameObject(id) {
 

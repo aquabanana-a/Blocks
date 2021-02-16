@@ -10,12 +10,20 @@ import android.util.Log
 import com.fromfinalform.blocks.presentation.model.graphics.opengl.common.GLUtils
 import com.fromfinalform.blocks.presentation.model.graphics.renderer.data.GLColor
 import com.fromfinalform.blocks.presentation.model.graphics.renderer.unit.IRenderUnit
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.asCoroutineDispatcher
+import java.util.concurrent.Executors
 import javax.microedition.khronos.egl.EGLConfig
 import javax.microedition.khronos.opengles.GL10
 import kotlin.math.max
 import kotlin.math.min
 
 class ViewRenderer(clearColor: Long, override var sceneSize: ISize) : IRenderer {
+
+    val job = SupervisorJob()
+    override val scope = CoroutineScope(Dispatchers.Default/*Executors.newFixedThreadPool(1).asCoroutineDispatcher()*/ + job)
 
     private val renderUnitsLo = Any()
     private var renderUnitsImpl = hashMapOf<Long, IRenderUnit>()

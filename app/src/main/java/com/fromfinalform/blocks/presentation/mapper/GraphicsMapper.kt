@@ -5,11 +5,10 @@
 
 package com.fromfinalform.blocks.presentation.mapper
 
-import com.fromfinalform.blocks.domain.model.game.GameObject
+import com.fromfinalform.blocks.domain.model.game.`object`.GameObject
 import com.fromfinalform.blocks.presentation.model.graphics.drawer.ShaderDrawerTypeId
 import com.fromfinalform.blocks.presentation.model.graphics.renderer.SceneParams
 import com.fromfinalform.blocks.presentation.model.graphics.renderer.unit.IRenderItem
-import com.fromfinalform.blocks.presentation.model.graphics.renderer.unit.IRenderUnit
 import com.fromfinalform.blocks.presentation.model.graphics.renderer.unit.RenderItem
 import com.fromfinalform.blocks.presentation.model.graphics.renderer.unit.RenderUnit
 import com.fromfinalform.blocks.presentation.model.graphics.texture.ITextTextureRepository
