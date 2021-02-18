@@ -9,7 +9,6 @@ import com.fromfinalform.blocks.domain.model.game.`object`.GameObject
 import com.fromfinalform.blocks.presentation.model.graphics.drawer.ShaderDrawerTypeId
 import com.fromfinalform.blocks.presentation.model.graphics.renderer.SceneParams
 import com.fromfinalform.blocks.presentation.model.graphics.renderer.unit.IRenderItem
-import com.fromfinalform.blocks.presentation.model.graphics.renderer.unit.RenderItem
 import com.fromfinalform.blocks.presentation.model.graphics.renderer.unit.RenderUnit
 import com.fromfinalform.blocks.presentation.model.graphics.texture.ITextTextureRepository
 import com.fromfinalform.blocks.presentation.model.graphics.texture.ITextureRepository
@@ -24,44 +23,40 @@ class GraphicsMapper {
         private var textureRepo: ITextureRepository = TextureRepository(App.getApplicationContext())
         private var textTextureRepo: ITextTextureRepository = TextTextureRepository(App.getApplicationContext())
 
+        fun List<GameObject>.toRenderUnit(params: SceneParams) = this?.map { it.toRenderUnit(params) }
         fun GameObject.toRenderUnit(params: SceneParams): RenderUnit {
             return RenderUnit().also {
                 it.withId(this.id)
-                it.mapLayout(this, params)
+                it.map(this, params)
 
                 if (this.childs != null)
                     for (c in ArrayList(this.childs))
                         it.addChild(c.toRenderUnit(params))
-
-                if (this.textStyle != null) {
-                    it.withShader(ShaderDrawerTypeId.TEXT)
-                    it.withTextResolver(GLTextResolver(textTextureRepo[this.textStyle!!], params))
-                }
-                else if (this.assetId != null) {
-                    it.withShader(ShaderDrawerTypeId.FLAT)
-                    it.withTexture(textureRepo[this.assetId!!])
-                }
-                else if (this.color != null) {
-                    it.withShader(ShaderDrawerTypeId.SOLID)
-                    it.withColor(this.color!!)
-                }
             }
         }
 
-        fun IRenderItem.mapLayout(src: GameObject, params: SceneParams) = arrayListOf(this).mapLayout(arrayListOf(src), params)
-        fun List<IRenderItem>.mapLayout(src: GameObject, params: SceneParams) = this.mapLayout(arrayListOf(src), params)
-        fun List<IRenderItem>.mapLayout(src: List<GameObject>?, params: SceneParams) {
+        fun IRenderItem.map(src: GameObject?, params: SceneParams) {
             if (src == null)
                 return
 
-            for (go in src)
-                for (iri in this) {
-                    val ri = iri as? RenderItem
-                    if (ri?.id == go.id) {
-                        ri.setLayout(-1 + go.x * params.sx, 1 - go.y * params.sy, go.width * params.sx, go.height * params.sy, go.rotation)
-                        ri.childs?.mapLayout(go.childs, params)
-                    }
-                }
+            val ru = this as? RenderUnit
+            if (ru == null)
+                return
+
+            ru.setLayout(-1 + src.x * params.sx, 1 - src.y * params.sy, src.width * params.sx, src.height * params.sy, src.rotation, src.alpha)
+
+            if (src.textStyle != null) {
+                ru.withShader(ShaderDrawerTypeId.TEXT)
+                ru.withTextResolver(GLTextResolver(textTextureRepo[src.textStyle!!], params))
+            } else if (src.assetId != null) {
+                ru.withShader(ShaderDrawerTypeId.FLAT)
+                ru.withTexture(textureRepo[src.assetId!!])
+            } else if (src.color != null) {
+                ru.withShader(ShaderDrawerTypeId.SOLID)
+                ru.withColor(src.color!!)
+            }
+
+            ru.childs?.forEach { ric -> ric.map(src.childs?.firstOrNull { goc -> goc.id == ric.id }, params) }
         }
     }
 }

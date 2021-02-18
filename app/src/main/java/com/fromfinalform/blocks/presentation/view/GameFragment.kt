@@ -24,7 +24,7 @@ import com.fromfinalform.blocks.presentation.view.common.dp
 import moxy.MvpAppCompatFragment
 import moxy.presenter.InjectPresenter
 
-class GameFragment : MvpAppCompatFragment(), GamePresenter.GameView {
+class GameFragment : MvpAppCompatFragment(), GamePresenter.GameView, GamePresenter.GamePropertyView {
 
     private lateinit var vRoot: ConstraintLayout
     private lateinit var vgCanvasGroup: ConstraintLayout
@@ -60,12 +60,14 @@ class GameFragment : MvpAppCompatFragment(), GamePresenter.GameView {
         tvStatus = vRoot.findViewById(R.id.tv_status)
 
         vRoot.findViewById<View>(R.id.btn_start).setOnClickListener {
+            presenter.startGame()
+
             //it.findNavController().navigate(GameFragmentDirections.actionGameFragmentToScoreFragment())
 
-            presenter.ru2!!.withLocation(-1f, 1f)
-            presenter.ru2!!.addAnimation(Alpha(1f, 0f, 500, interpolator = LinearInterpolator()))
-            presenter.ru2!!.addAnimation(TranslateTo(PointF(0f, 0f), 0.0005f, interpolator =  BounceInterpolator()))
-            presenter.ru2!!.addAnimation(RotateBy(900f, 0.1f, interpolator = BounceInterpolator()))
+//            presenter.ru2!!.withLocation(-1f, 1f)
+//            presenter.ru2!!.addAnimation(Alpha(1f, 0f, 500, interpolator = LinearInterpolator()))
+//            presenter.ru2!!.addAnimation(TranslateTo(PointF(0f, 0f), 0.0005f, interpolator =  BounceInterpolator()))
+//            presenter.ru2!!.addAnimation(RotateBy(900f, 0.1f, interpolator = BounceInterpolator()))
 
 //            presenter.ru2!!.withLocation(0f, 0f)
 //            presenter.ru2!!.addAnimation(ScaleXY(1f, 2f, 1f, 2f, 4000, interpolator = LinearInterpolator())
@@ -77,12 +79,12 @@ class GameFragment : MvpAppCompatFragment(), GamePresenter.GameView {
         }
 
         vRoot.findViewById<View>(R.id.btn_stop).setOnClickListener {
-
         }
 
         return vRoot
     }
 
+    override val surfaceView get() = glSurface
     override fun requestRender() { vRoot.post { glSurface.requestRender() } }
     override fun setRenderMode(mode: Int) { vRoot.post { glSurface.renderMode = mode } }
 
@@ -93,7 +95,7 @@ class GameFragment : MvpAppCompatFragment(), GamePresenter.GameView {
         vRoot.post {
             val appPadding = (2 + 2).dp
             val mainFramePadding = (14 + 14).dp
-            val canvasFramePadding = (5 + 5).dp
+            val canvasFramePadding = (4 + 4).dp
 
             val clp = vgCanvasGroup.layoutParams as ConstraintLayout.LayoutParams
             clp.width = params.scaledSceneWidth.toInt() + canvasFramePadding

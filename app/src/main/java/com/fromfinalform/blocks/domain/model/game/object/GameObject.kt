@@ -5,8 +5,10 @@
 
 package com.fromfinalform.blocks.domain.model.game.`object`
 
+import android.util.Log
 import com.fromfinalform.blocks.common.ICloneable
 import com.fromfinalform.blocks.presentation.model.graphics.text.TextStyle
+import java.util.concurrent.atomic.AtomicBoolean
 
 open class GameObject(val id: Long = GameObjectIndexer.getNext()) : ICloneable<GameObject> {
     var x: Float = 0f
@@ -14,6 +16,7 @@ open class GameObject(val id: Long = GameObjectIndexer.getNext()) : ICloneable<G
     var width: Float = 0f
     var height: Float = 0f
     var rotation: Float = 0f
+    var alpha: Float = 1f
 
     var assetId: Int? = null
     var color: Long? = null
@@ -21,6 +24,20 @@ open class GameObject(val id: Long = GameObjectIndexer.getNext()) : ICloneable<G
 
     var childs: List<GameObject>? = null
 
+    private val dirty = AtomicBoolean(true)
+    val isDirty get() = dirty.get()
+
+    private val lo = Any()
+    
+    fun requestDraw(): GameObject {
+        this.dirty.set(true)
+        return this
+    }
+    
+    fun onDrawn() {
+        this.dirty.set(false)
+    }
+    
     fun translate(dX: Float, dY: Float): GameObject {
         this.translateX(dX)
         this.translateY(dY)
@@ -38,6 +55,13 @@ open class GameObject(val id: Long = GameObjectIndexer.getNext()) : ICloneable<G
         this.childs?.forEach { c -> c.translateY(dY) }
         return this
     }
+
+    fun add(value: GameObject): GameObject { synchronized(lo) {
+        if (childs == null)
+            childs = arrayListOf()
+        (this.childs as MutableList).add(value)
+        return this
+    }}
 
     override fun clone(): GameObject {
         val ret = GameObject()

@@ -7,20 +7,22 @@ package com.fromfinalform.blocks.presentation.presenter
 
 import android.graphics.PointF
 import android.opengl.GLSurfaceView
+import android.view.View
+import android.view.animation.BounceInterpolator
+import android.view.animation.LinearInterpolator
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.OnLifecycleEvent
-import com.fromfinalform.blocks.domain.model.game.mode.classic.ClassicGameConfig
-import com.fromfinalform.blocks.data.model.game.ClassicGameFieldBackground
-import com.fromfinalform.blocks.domain.interactor.BlockBuilder
 import com.fromfinalform.blocks.domain.model.game.IGameLooper
-import com.fromfinalform.blocks.domain.model.game.`object`.block.BlockTypeId
-import com.fromfinalform.blocks.domain.model.game.`object`.GameObject
 import com.fromfinalform.blocks.domain.model.game.configuration.IGameConfig
 import com.fromfinalform.blocks.presentation.dagger.DaggerGameComponent
 import com.fromfinalform.blocks.presentation.dagger.GameComponent
+import com.fromfinalform.blocks.presentation.mapper.GraphicsMapper.Companion.map
 import com.fromfinalform.blocks.presentation.mapper.GraphicsMapper.Companion.toRenderUnit
+import com.fromfinalform.blocks.presentation.model.graphics.animation.Alpha
+import com.fromfinalform.blocks.presentation.model.graphics.animation.RotateBy
+import com.fromfinalform.blocks.presentation.model.graphics.animation.TranslateTo
 import com.fromfinalform.blocks.presentation.model.graphics.renderer.*
 import com.fromfinalform.blocks.presentation.model.graphics.renderer.unit.RenderUnit
 import com.fromfinalform.blocks.presentation.model.graphics.texture.ITextureRepository
@@ -37,6 +39,10 @@ import javax.inject.Inject
 @InjectViewState
 class GamePresenter : MvpPresenter<GamePresenter.GameView>(), LifecycleObserver {
 
+    interface GamePropertyView {
+        val surfaceView: GLSurfaceView
+    }
+
     interface GameView : MvpView {
         @StateStrategyType(value = AddToEndSingleStrategy::class) fun requestRender()
         @StateStrategyType(value = AddToEndSingleStrategy::class) fun setRenderMode(mode: Int)
@@ -44,13 +50,29 @@ class GamePresenter : MvpPresenter<GamePresenter.GameView>(), LifecycleObserver 
         @StateStrategyType(value = AddToEndSingleStrategy::class) fun onSceneConfigured(params: SceneParams)
     }
 
+    val viewProperty get(): GamePropertyView? = attachedViews.firstOrNull { it is GamePropertyView } as? GamePropertyView
+
     val renderer: IRenderer get() = glViewRenderer
     private lateinit var gameComponent: GameComponent
-    @Inject lateinit var gameLooper: IGameLooper
+    @Inject protected lateinit var gameLooper: IGameLooper
+    @Inject protected lateinit var gameConfig: IGameConfig
 
     private lateinit var glViewRenderer: ViewRenderer
-    private /*lateinit*/ var config: IGameConfig = ClassicGameConfig()
     private /*lateinit*/ var textureRepo: ITextureRepository = TextureRepository(App.getApplicationContext())
+
+    private fun postGl(handler: ()->Unit) {
+        if(viewProperty == null)
+            return
+        viewProperty!!.surfaceView.queueEvent(handler)
+    }
+
+    fun startGame() { postGl {
+        gameLooper.start()
+    } }
+
+    fun stopGame() {
+
+    }
 
     override fun onFirstViewAttach() {
 
@@ -63,15 +85,11 @@ class GamePresenter : MvpPresenter<GamePresenter.GameView>(), LifecycleObserver 
         gameComponent = DaggerGameComponent.create()
         gameComponent.injectGamePresenter(this)
 
-        glViewRenderer = ViewRenderer(0xFF20242F, Size(config.fieldWidthPx, config.fieldHeightPx))
+        glViewRenderer = ViewRenderer(0xFF20242F, Size(gameConfig.fieldWidthPx, gameConfig.fieldHeightPx))
             .withUpdater { viewState.requestRender() }
             .withListener(object : RendererListener {
 
                 lateinit var sceneParams: SceneParams
-                var ru: RenderUnit? = null
-
-                var go: GameObject? = null
-                var pt: PointF? = null
 
                 override fun onFirstFrame() {
 
@@ -82,47 +100,51 @@ class GamePresenter : MvpPresenter<GamePresenter.GameView>(), LifecycleObserver 
 
                 override fun onCrash() {}
                 override fun onFrame(renderParams: RenderParams, sceneParams: SceneParams) {
-//                    looper.onFrame(frame, timeMs, deltaTimeMs)
-
-                    //ru?.withRotation(frame / 2f)
-
-                    //go!!.translateX(0.5f)
-                    //glViewRenderer.renderUnits.mapLayout(go!!, sceneParams)
-
-
-//                    var p = PointF(ru2!!.x, ru2!!.y)
-//                    rotateGLPoint(p, pt!!, ru2!!.itemParams.angle + 1f)
-//                    ru2!!.withLocation(p.x, p.y)
-
-                    //ru2!!.itemParams.rotate(pt!!, ru2!!.itemParams.angle + 1f)
-
-                    //ru2!!.rotate(0.1f)
+                    gameLooper.objectsDirtyFlat.forEach {
+                        val ru = glViewRenderer.getRenderUnit(it.id)
+                        ru?.map(it, sceneParams)
+                        it.onDrawn()
+                    }
                 }
 
                 override fun onSceneConfigured(params: SceneParams) {
                     viewState.onSceneConfigured(params)
 
                     this.sceneParams = params
+
+                    gameLooper.init()
+                    gameLooper.withObjectsCountChangedListener { toAdd, toRemove ->
+                        if (toAdd != null) {
+                            val ru = toAdd.toRenderUnit(sceneParams).first()
+                            ru.withLocation(-1f, 1f)
+                            ru.addAnimation(Alpha(1f, 0f, 500, interpolator = LinearInterpolator()))
+                            ru.addAnimation(TranslateTo(PointF(0.5f, -0.6f), 0.0005f, interpolator = BounceInterpolator()))
+                            ru.addAnimation(RotateBy(900f, 0.1f, interpolator = BounceInterpolator()))
+                            glViewRenderer.add(ru)
+                        }
+                    }
+                    viewProperty!!.surfaceView.setOnTouchListener { v, me -> gameLooper.onTouch(me, params) }
+
                     RenderUnit.shaderRepo = ShaderDrawerRepository().apply { initialize() }
 
-                    var cw = config.blockWidthPx * sceneParams.sx
-                    var ch = config.blockHeightPx * sceneParams.sy
+                    var cw = gameConfig.blockWidthPx * sceneParams.sx
+                    var ch = gameConfig.blockHeightPx * sceneParams.sy
 
                     glViewRenderer.clearRenderUnits()
 
-                    ru = ClassicGameFieldBackground().build(config).toRenderUnit(sceneParams)
-                    glViewRenderer.add(ru!!)
+//                    ru = ClassicGameFieldBackground().build(gameConfig).toRenderUnit(sceneParams)
+//                    glViewRenderer.add(ru!!)
+//
+//                    go = BlockBuilder(gameConfig).withTypeId(BlockTypeId._128).build()
+////                    go!!.translateX(config.blockGapHPx)
+////                    go!!.translateX(config.fieldWidthPx / 2)
+////                    go!!.translateY(config.fieldHeightPx / 2)
+//                    ru2 = go!!.toRenderUnit(sceneParams)
+//                    ru2!!.translateXY(0f, 0f)
+//
+//                    pt = PointF(ru2!!.x, ru2!!.y)
 
-                    go = BlockBuilder(config).withTypeId(BlockTypeId._128).build()
-//                    go!!.translateX(config.blockGapHPx)
-//                    go!!.translateX(config.fieldWidthPx / 2)
-//                    go!!.translateY(config.fieldHeightPx / 2)
-                    ru2 = go!!.toRenderUnit(sceneParams)
-                    ru2!!.translateXY(0f, 0f)
-
-                    pt = PointF(ru2!!.x, ru2!!.y)
-
-                    glViewRenderer.add(ru2!!)
+                    glViewRenderer.add(gameLooper.objects.toRenderUnit(sceneParams))
                 }
             })
 

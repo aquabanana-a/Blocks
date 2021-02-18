@@ -195,7 +195,7 @@ open class ScaleXY(
             }
 
         if (affectChilds)
-            item.childs?.toList()?.forEach { transformImpl(it, renderParams, sceneParams) }
+            item.childs?.mapNotNull { it as? RenderItem }?.forEach { transformImpl(it, renderParams, sceneParams) }
 
         scalexTransformed = scalex
         scaleyTransformed = scaley

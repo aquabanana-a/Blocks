@@ -69,7 +69,7 @@ class RenderUnit : RenderItem(), IRenderUnit {
             drawer.cleanUniforms()
         }
 
-        item.childs?.toList()?.forEach {
+        item.childs?.mapNotNull { it as? RenderItem }?.forEach {
             renderImpl(it, renderer, renderParams, sceneParams, item)
         }
     }

@@ -13,7 +13,6 @@ import com.fromfinalform.blocks.domain.model.game.mode.classic.ClassicGameField
 import com.fromfinalform.blocks.domain.model.game.mode.classic.ClassicGameLooper
 import dagger.Binds
 import dagger.Module
-import javax.inject.Singleton
 
 @Module
 interface ClassicGameModule {

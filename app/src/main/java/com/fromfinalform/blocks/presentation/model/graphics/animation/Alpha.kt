@@ -37,7 +37,7 @@ class Alpha(var alphaEnd: Float, var alphaStart: Float = START_VALUE_CURRENT, ov
         item.alpha = alphaStart + (alphaEnd - alphaStart) * valueInterpolated
 
         if (affectChilds)
-            item.childs?.toList()?.forEach { transformImpl(it, renderParams, sceneParams) }
+            item.childs?.mapNotNull { it as? RenderItem }?.forEach { transformImpl(it, renderParams, sceneParams) }
 
         return value >= 1.0f
     }

@@ -16,9 +16,10 @@ open class RenderItem(
     val itemParams: ItemParams = ItemParams(
         RectF(-1f, 1f, -1f, 1f),
         RectF(0f, 0f, 1f, 1f)
-    )) : IRenderItem, ICloneable<RenderItem> {
+    )) : IRenderItem {
 
     override var id: Long = -1L
+    override var parent: IRenderItem?= null
 
     var x       get()  = itemParams.dstRect.left
                 set(v) { val dx = v - itemParams.dstRect.left
@@ -65,7 +66,7 @@ open class RenderItem(
     var blendDstAlpha: Int? = null;                 private set
 
     private val lo = Any()
-    var childs: List<RenderItem>? = null;           private set
+    override var childs: List<IRenderItem>? = null
     var animations: List<IGLAnimation>? = null;     private set
 
     val usedBlend get() = usedBlendFactor || usedBlendSeparate
@@ -74,20 +75,20 @@ open class RenderItem(
 
     fun translateX(dX: Float): RenderItem { synchronized(lo) {
         this.x += dX
-        this.childs?.forEach { c -> c.translateX(dX) }
+        this.childs?.mapNotNull { it as? RenderItem }?.forEach { c -> c.translateX(dX) }
         return this
     } }
 
     fun translateY(dY: Float): RenderItem { synchronized(lo) {
         this.y -= dY
-        this.childs?.forEach { c -> c.translateY(dY) }
+        this.childs?.mapNotNull { it as? RenderItem }?.forEach { c -> c.translateY(dY) }
         return this
     } }
 
     fun translateXY(dX: Float, dY: Float): RenderItem { synchronized(lo) {
         this.x += dX
         this.y -= dY
-        this.childs?.forEach { c -> c.translateXY(dX, dY) }
+        this.childs?.mapNotNull { it as? RenderItem }?.forEach { c -> c.translateXY(dX, dY) }
         return this
     } }
 
@@ -103,13 +104,13 @@ open class RenderItem(
 
     fun alphaSet(value: Float): RenderItem { synchronized(lo) {
         this.alpha = value
-        this.childs?.forEach { it.alphaSet(value) }
+        this.childs?.mapNotNull { it as? RenderItem }?.forEach { it.alphaSet(value) }
         return this
     } }
 
     fun alphaMul(value: Float): RenderItem { synchronized(lo) {
         this.alpha *= value
-        this.childs?.forEach { it.alphaMul(value) }
+        this.childs?.mapNotNull { it as? RenderItem }?.forEach { it.alphaMul(value) }
         return this
     } }
 
@@ -122,7 +123,7 @@ open class RenderItem(
         val dw = width*(factor - 1)
         this.x -= dw / 2f
         this.width += dw
-        this.childs?.forEach { c -> c.scaleX(factor) }
+        this.childs?.mapNotNull { it as? RenderItem }?.forEach { c -> c.scaleX(factor) }
         return this
     } }
 
@@ -130,7 +131,7 @@ open class RenderItem(
         val dh = height * (factor - 1)
         this.y += dh / 2f
         this.height += dh
-        this.childs?.forEach { c -> c.scaleY(factor) }
+        this.childs?.mapNotNull { it as? RenderItem }?.forEach { c -> c.scaleY(factor) }
         return this
     } }
 
@@ -141,21 +142,26 @@ open class RenderItem(
         this.y += dh / 2f
         this.width += dw
         this.height += dh
-        this.childs?.forEach { c -> c.scaleXY(factor) }
+        this.childs?.mapNotNull { it as? RenderItem }?.forEach { c -> c.scaleXY(factor) }
         return this
     } }
 
-    fun addChild(value: RenderItem) { synchronized(lo) {
+    override fun addChild(value: IRenderItem) { synchronized(lo) {
         if(this.childs == null)
             this.childs = ArrayList()
 
+        value.parent = this
         (this.childs as ArrayList).add(value)
     } }
 
-    fun removeChild(id: Long): RenderItem? { synchronized(lo) {
+    override fun removeChild(id: Long): IRenderItem? { synchronized(lo) {
         var item = (this.childs as? ArrayList)?.first { it.id == id }
         val removed = (this.childs as? ArrayList)?.remove(item)
-        return if (removed == true) item else null
+        if (removed == true) {
+            item?.parent = null
+            return item
+        }
+        return null
     } }
 
     fun addAnimation(value: IGLAnimation) { synchronized(lo) {
@@ -174,12 +180,13 @@ open class RenderItem(
         return this
     }
 
-    fun setLayout(x: Float, y: Float, w: Float, h: Float, r: Float) { synchronized(lo) {
+    fun setLayout(x: Float, y: Float, w: Float, h: Float, r: Float, a: Float) { synchronized(lo) {
         this.x = x
         this.y = y
         this.width = w
         this.height = h
         this.rotation = r
+        this.alpha = a
     } }
 
     fun withLocation(x: Float, y: Float): RenderItem {
@@ -238,8 +245,8 @@ open class RenderItem(
         return this
     }
 
-    fun withChilds(values: List<RenderItem>?): RenderItem { synchronized(lo) {
-        this.childs = if(values == null) null else ArrayList(values.map { c -> c.clone() })
+    fun withChilds(values: List<IRenderItem>?): RenderItem { synchronized(lo) {
+        this.childs = values?.map { c -> c.clone() }
         return this
     } }
 

@@ -5,6 +5,13 @@
 
 package com.fromfinalform.blocks.presentation.model.graphics.renderer.unit
 
-interface IRenderItem {
+import com.fromfinalform.blocks.common.ICloneable
+
+interface IRenderItem : ICloneable<IRenderItem> {
     val id: Long
+    var parent: IRenderItem?
+    var childs: List<IRenderItem>?
+
+    fun addChild(value: IRenderItem)
+    fun removeChild(id: Long): IRenderItem?
 }

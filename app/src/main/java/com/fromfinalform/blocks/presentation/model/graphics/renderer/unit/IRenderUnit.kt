@@ -10,10 +10,6 @@ import com.fromfinalform.blocks.presentation.model.graphics.renderer.RenderParam
 import com.fromfinalform.blocks.presentation.model.graphics.renderer.SceneParams
 
 interface IRenderUnit : IRenderItem {
-    val childs: List<RenderItem>?
-
-    fun addChild(value: RenderItem)
-    fun removeChild(id: Long): RenderItem?
 
     fun prerender(renderer: IRenderer)
     fun render(renderer: IRenderer, renderParams: RenderParams, sceneParams: SceneParams)

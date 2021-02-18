@@ -17,8 +17,9 @@ interface IRenderer : GLSurfaceView.Renderer {
 
     val renderUnits: List<IRenderUnit>
     fun add(ru: IRenderUnit)
+    fun add(ru: List<IRenderUnit>)
     fun getRenderUnit(id: Long): IRenderUnit?
-    fun removeRenderUnit(id: Long)
+    fun removeRenderUnit(id: Long): IRenderUnit?
     fun clearRenderUnits()
 
     fun start()

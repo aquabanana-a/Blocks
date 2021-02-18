@@ -5,7 +5,12 @@
 
 package com.fromfinalform.blocks.domain.model.game
 
-interface IGameField {
+import android.view.MotionEvent
+import com.fromfinalform.blocks.presentation.model.graphics.renderer.SceneParams
+
+interface IGameField : IGameObjectsHolder {
+
+    fun onTouch(me: MotionEvent, sp: SceneParams): Boolean
 
     fun init()
 

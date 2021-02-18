@@ -5,14 +5,22 @@
 
 package com.fromfinalform.blocks.domain.model.game
 
+import android.view.MotionEvent
+import com.fromfinalform.blocks.domain.model.game.`object`.GameObject
 import com.fromfinalform.blocks.domain.model.game.`object`.block.Block
-import com.fromfinalform.blocks.domain.model.game.configuration.IGameConfig
+import com.fromfinalform.blocks.presentation.model.graphics.renderer.SceneParams
 
-interface IGameLooper {
+interface IGameLooper : IGameObjectsHolder {
+
+    val objectsDirtyFlat: List<GameObject>
 
     val nextBlock: Block?
+
+    fun onTouch(me: MotionEvent, sp: SceneParams): Boolean
 
     fun init()
     fun start()
     fun stop()
+
+    fun withObjectsCountChangedListener(handler: ((added: List<GameObject>?, removed: List<GameObject>?) -> Unit)?): IGameLooper
 }

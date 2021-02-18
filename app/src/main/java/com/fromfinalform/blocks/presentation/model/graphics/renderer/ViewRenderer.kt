@@ -9,7 +9,10 @@ import android.opengl.GLES20.glViewport
 import android.util.Log
 import com.fromfinalform.blocks.presentation.model.graphics.opengl.common.GLUtils
 import com.fromfinalform.blocks.presentation.model.graphics.renderer.data.GLColor
+import com.fromfinalform.blocks.presentation.model.graphics.renderer.unit.IRenderItem
 import com.fromfinalform.blocks.presentation.model.graphics.renderer.unit.IRenderUnit
+import com.fromfinalform.blocks.presentation.model.graphics.renderer.unit.RenderItem
+import com.fromfinalform.blocks.presentation.model.graphics.renderer.unit.RenderUnit
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -33,26 +36,41 @@ class ViewRenderer(clearColor: Long, override var sceneSize: ISize) : IRenderer 
         renderUnitsImpl[ru.id] = ru
         renderUnitsSorted.add(ru)
     } }
-    override fun getRenderUnit(id: Long): IRenderUnit? { synchronized(renderUnitsLo) {
-        var ru = renderUnitsImpl[id]
-        if (ru == null)
-            for (v in renderUnitsImpl.values) {
-                ru = v.childs?.first { c -> c.id == id } as? IRenderUnit?
+    override fun add(rus: List<IRenderUnit>) { synchronized(renderUnitsLo) {
+        rus.forEach {
+            renderUnitsImpl[it.id] = it
+            renderUnitsSorted.add(it)
+        }
+    } }
+
+    private fun getRenderUnitImpl(list: List<IRenderItem>?, id: Long): IRenderUnit? {
+        list?.forEach {
+            if (it.id == id)
+                return it as? RenderUnit
+            else if (it is RenderItem && it.childs != null) {
+                val ru = getRenderUnitImpl(it.childs, id)
                 if (ru != null)
                     return ru
             }
-        return ru
-    } }
-    override fun removeRenderUnit(id: Long) { synchronized(renderUnitsLo) {
-        var ru = renderUnitsImpl.remove(id)
-        if (ru == null) {
-            var parentRU: IRenderUnit? = null
-            for (v in renderUnitsImpl.values)
-                if (v.childs?.any { c -> c.id == id } == true)
-                    parentRU = v
-            ru = parentRU?.removeChild(id) as? IRenderUnit
         }
-        renderUnitsSorted.remove(ru)
+        return null
+    }
+    override fun getRenderUnit(id: Long): IRenderUnit? { synchronized(renderUnitsLo) {
+        val ru = renderUnitsImpl[id]
+        return ru ?: getRenderUnitImpl(renderUnitsSorted, id)
+    } }
+    override fun removeRenderUnit(id: Long): IRenderUnit? { synchronized(renderUnitsLo) {
+        var ru = renderUnitsImpl.remove(id)
+        if (ru != null) {
+            renderUnitsSorted.remove(ru)
+            return ru
+        }
+        else {
+            ru = getRenderUnit(id)
+            return ru?.parent?.removeChild(id) as? IRenderUnit
+        }
+
+        return null
     } }
     override fun clearRenderUnits() { synchronized(renderUnitsLo) {
         renderUnitsImpl.clear()
