@@ -7,12 +7,17 @@ package com.fromfinalform.blocks.presentation.model.graphics.renderer
 
 import android.opengl.GLES20.glViewport
 import android.util.Log
+import com.fromfinalform.blocks.presentation.model.graphics.drawer.IShaderDrawerRepository
 import com.fromfinalform.blocks.presentation.model.graphics.opengl.common.GLUtils
 import com.fromfinalform.blocks.presentation.model.graphics.renderer.data.GLColor
 import com.fromfinalform.blocks.presentation.model.graphics.renderer.unit.IRenderItem
 import com.fromfinalform.blocks.presentation.model.graphics.renderer.unit.IRenderUnit
 import com.fromfinalform.blocks.presentation.model.graphics.renderer.unit.RenderItem
 import com.fromfinalform.blocks.presentation.model.graphics.renderer.unit.RenderUnit
+import com.fromfinalform.blocks.presentation.model.repository.ShaderDrawerRepository
+import com.fromfinalform.blocks.presentation.model.repository.TextTextureRepository
+import com.fromfinalform.blocks.presentation.model.repository.TextureRepository
+import com.fromfinalform.blocks.presentation.view.App
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -27,6 +32,8 @@ class ViewRenderer(clearColor: Long, override var sceneSize: ISize) : IRenderer 
 
     val job = SupervisorJob()
     override val scope = CoroutineScope(Dispatchers.Default/*Executors.newFixedThreadPool(1).asCoroutineDispatcher()*/ + job)
+
+    private var repos: RenderRepo? = null
 
     private val renderUnitsLo = Any()
     private var renderUnitsImpl = hashMapOf<Long, IRenderUnit>()
@@ -96,11 +103,15 @@ class ViewRenderer(clearColor: Long, override var sceneSize: ISize) : IRenderer 
 
     }
 
-    override fun onSurfaceChanged(gl: GL10?, w: Int, h: Int) {
+    override fun onSurfaceChanged(gl: GL10?, w: Int, h: Int) { // todo: fix multi call on init
         configureScene(w, h)
         glViewport(0, 0, w, h)
 
-        handler?.onSceneConfigured(sceneParams)
+        repos = RenderRepo(
+            ShaderDrawerRepository().apply { initialize() },
+            TextureRepository(App.getApplicationContext()),
+            TextTextureRepository(App.getApplicationContext()))
+        handler?.onSceneConfigured(repos!!, sceneParams)
     }
 
     override fun onDrawFrame(gl: GL10?) { try {
@@ -112,7 +123,7 @@ class ViewRenderer(clearColor: Long, override var sceneSize: ISize) : IRenderer 
         val nowTimeMs = System.currentTimeMillis()
         renderTimeMs = nowTimeMs - startTime
         val deltaTimeMs = if (lastFrameTimeMs <= 0) 0 else max(0, nowTimeMs - lastFrameTimeMs)
-        var renderParams = RenderParams(frames, renderTimeMs, deltaTimeMs)
+        var renderParams = RenderParams(frames, renderTimeMs, deltaTimeMs, repos!!)
 
         GLUtils.clear(bgARGB)
 

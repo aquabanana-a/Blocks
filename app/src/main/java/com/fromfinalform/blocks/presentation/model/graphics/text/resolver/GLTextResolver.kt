@@ -1,4 +1,4 @@
-package io.instories.core.render.resolver
+package com.fromfinalform.blocks.presentation.model.graphics.text.resolver
 
 import android.graphics.PointF
 import android.graphics.RectF
@@ -12,11 +12,8 @@ import com.fromfinalform.blocks.presentation.model.graphics.drawer.ISpriteDrawer
 import com.fromfinalform.blocks.presentation.model.graphics.renderer.SceneParams
 import com.fromfinalform.blocks.presentation.model.graphics.renderer.unit.ItemParams
 import com.fromfinalform.blocks.presentation.model.graphics.text.GLChar
-import com.vdurmont.emoji.EmojiManager
-import com.vdurmont.emoji.EmojiParser
 import com.fromfinalform.blocks.presentation.model.graphics.text.GLTextTexture
 import com.fromfinalform.blocks.presentation.model.graphics.text.TextLayout
-import com.fromfinalform.blocks.presentation.model.graphics.text.resolver.*
 import kotlin.math.abs
 import kotlin.math.floor
 
@@ -316,7 +313,7 @@ class GLTextResolver(val glTextTexture: GLTextTexture, val params: SceneParams) 
     // we need this because Emoji can consists of 2+ chars
     private fun splitWordOnSymbols(word: String): ArrayList<String> {
         val ret = arrayListOf<String>()
-        val haveEmoji = EmojiManager.containsEmoji(word)
+        val haveEmoji = false//EmojiManager.containsEmoji(word)
 
         if (!haveEmoji)
             word.forEach { ret.add(it.toString()) }
@@ -327,13 +324,13 @@ class GLTextResolver(val glTextTexture: GLTextTexture, val params: SceneParams) 
             val separator = "▄"
             val uniquelizer = "˧"
 
-            EmojiParser.extractEmojis(word).forEach {
-                val key = "${uniquelizer}${emojiIndex}"
-                val replacer = "${separator}${key}${separator}"
-                emojis[key] = it
-                processingWord = processingWord.replaceFirst(it, replacer)
-                emojiIndex++
-            }
+//            EmojiParser.extractEmojis(word).forEach {
+//                val key = "${uniquelizer}${emojiIndex}"
+//                val replacer = "${separator}${key}${separator}"
+//                emojis[key] = it
+//                processingWord = processingWord.replaceFirst(it, replacer)
+//                emojiIndex++
+//            }
 
             processingWord.split(separator).forEach {
                 val e = emojis[it]

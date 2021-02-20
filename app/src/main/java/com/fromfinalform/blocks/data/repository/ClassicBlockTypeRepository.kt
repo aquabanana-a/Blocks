@@ -19,8 +19,12 @@ import com.fromfinalform.blocks.domain.model.game.`object`.block.BlockTypeId._51
 import com.fromfinalform.blocks.domain.model.game.`object`.block.BlockTypeId._1024
 import com.fromfinalform.blocks.domain.model.game.`object`.block.BlockTypeId._2048
 import com.fromfinalform.blocks.domain.repository.IBlockTypeRepository
+import kotlin.random.Random
 
 class ClassicBlockTypeRepository : IBlockTypeRepository {
+
+    val rnd = Random(System.currentTimeMillis())
+    val rndChancedList = arrayListOf<BlockTypeId>()
 
     private val blocksByTypeId = hashMapOf<BlockTypeId, BlockType>()
     override fun get(typeId: BlockTypeId): BlockType {
@@ -43,5 +47,16 @@ class ClassicBlockTypeRepository : IBlockTypeRepository {
         add(BlockType(_512, 0xFF7163CC, 0xFFFFFFFF))
         add(BlockType(_1024, 0xFF62AD4C, 0xFFFFFFFF))
         add(BlockType(_2048, 0xFF4995AA, 0xFFFFFFFF))
+
+        blocksByTypeId.values.forEach {
+            for (i in 0 until it.chanceCoeff)
+                rndChancedList.add(if (rndChancedList.size > 0) rnd.nextInt(rndChancedList.size) else 0, it.id)
+        }
+        rndChancedList.shuffle()
+    }
+
+    override fun getRandom(): BlockType {
+        val index = (rnd.nextInt(0, rndChancedList.size * 1000) / 1000f).toInt().coerceIn(0, rndChancedList.size-1)
+        return get(rndChancedList[index])
     }
 }

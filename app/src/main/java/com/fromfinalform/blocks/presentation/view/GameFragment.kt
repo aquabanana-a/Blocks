@@ -79,6 +79,7 @@ class GameFragment : MvpAppCompatFragment(), GamePresenter.GameView, GamePresent
         }
 
         vRoot.findViewById<View>(R.id.btn_stop).setOnClickListener {
+            presenter.stopGame()
         }
 
         return vRoot

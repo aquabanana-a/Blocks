@@ -59,9 +59,9 @@ public class EGL14Config {
                     EGL14.EGL_DEPTH_SIZE, 16,
 
                     // Requires that setEGLContextClientVersion(2) is called on the view.
-                    EGL14.EGL_RENDERABLE_TYPE, 4, // EGL_OPENGL_ES2_BIT
-                    EGL14.EGL_SAMPLE_BUFFERS, 1,
-                    EGL14.EGL_SAMPLES, 4, // This is for 4x MSAA
+//                    EGL14.EGL_RENDERABLE_TYPE, 4, // EGL_OPENGL_ES2_BIT
+//                    EGL14.EGL_SAMPLE_BUFFERS, 1,
+//                    EGL14.EGL_SAMPLES, 4, // This is for 4x MSAA
 
                     EGL14.EGL_NONE};
 

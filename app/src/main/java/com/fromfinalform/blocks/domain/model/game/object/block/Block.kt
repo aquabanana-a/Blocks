@@ -20,8 +20,8 @@ class Block(val typeId: BlockTypeId, id: Long = GameObjectIndexer.getNext()) : G
         ret.color = color
         ret.textStyle = textStyle
 
-        if (childs != null)
-            ret.childs = childs!!.map { it.clone() }
+        if (childs != null) ret.childs = childs!!.map { it.clone() }
+        if (animations != null) ret.animations = animations!!.map { it.clone() }
 
         return ret
     }

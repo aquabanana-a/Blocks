@@ -13,7 +13,7 @@ import com.fromfinalform.blocks.presentation.model.graphics.renderer.data.GLText
 import com.fromfinalform.blocks.presentation.model.graphics.renderer.data.GLVertices
 import com.fromfinalform.blocks.presentation.model.graphics.renderer.unit.IRenderUnit
 import com.fromfinalform.blocks.presentation.model.graphics.renderer.unit.ItemParams
-import io.instories.core.render.resolver.GLTextResolver
+import com.fromfinalform.blocks.presentation.model.graphics.text.resolver.GLTextResolver
 import kotlin.math.min
 
 class TextShaderDrawer : IShaderDrawer, ISpriteDrawer {
@@ -43,8 +43,8 @@ class TextShaderDrawer : IShaderDrawer, ISpriteDrawer {
         """
 
     override val FRAGMENT_SHADER = """
-        /*precision mediump float;*/
-        precision highp float;                                                            
+        precision mediump float;
+        /*precision highp float;*/                                                         
         varying vec2 vTextureCoord;                                                          
         varying vec2 vPositionCoord;                                                         
         varying vec4 vColor;                                                                 

@@ -5,5 +5,5 @@
 
 package com.fromfinalform.blocks.domain.model.game.`object`.block
 
-class BlockType(val id: BlockTypeId, val bgColor: Long, val txtColor: Long) {
+class BlockType(val id: BlockTypeId, val bgColor: Long, val txtColor: Long, val chanceCoeff: Int = 1) {
 }

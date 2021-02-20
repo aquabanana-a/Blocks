@@ -6,7 +6,6 @@ import android.opengl.GLES20
 import androidx.core.content.res.ResourcesCompat
 import com.fromfinalform.blocks.presentation.model.graphics.opengl.common.GLUtils
 import com.fromfinalform.blocks.presentation.model.graphics.renderer.data.GLTextureRegion
-import com.vdurmont.emoji.EmojiParser
 import java.lang.Exception
 import kotlin.math.abs
 import kotlin.math.ceil
@@ -70,8 +69,9 @@ class GLTextTexture {
 
         charMapStr = charMap ?: ""
 
-        var cm = EmojiParser.removeAllEmojis(charMap ?: "")
-        var em = EmojiParser.extractEmojis(charMap ?: "")
+        // todo: Emoji somewhy initiates 3 sec on emulator. 1st time call with big delay. prbbl need to move it outside
+        var cm = charMap!!//EmojiParser.removeAllEmojis(charMap ?: "")
+        var em = arrayListOf<String>()//EmojiParser.extractEmojis(charMap ?: "")
 
         if (cm.isNotEmpty()) (cm + "0123456789_").toSet().forEach {
             this.charMap[it.toString()] = GLChar(it.toInt())
@@ -231,10 +231,10 @@ class GLTextTexture {
         GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_WRAP_S, GLES20.GL_CLAMP_TO_EDGE)
         GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_WRAP_T, GLES20.GL_CLAMP_TO_EDGE)
 
-        GLUtils.checkGlError("before load GLText texture")
+        //GLUtils.checkGlError("before load GLText texture")
         android.opengl.GLUtils.texImage2D(GLES20.GL_TEXTURE_2D, 0, bitmap, 0)
 
-        GLUtils.checkGlError("on load GLText texture " + textureSize + "x" + textureSize + "(GL_MAX_TEXTURE_SIZE:${textureMaxSize[0]}; cell:${cellWidth}x${cellHeight}; cell_count:${getGLCharsMapSize()}; font_size:${size}; pad_x:${padX}; pad_y:${padY};)")
+        //GLUtils.checkGlError("on load GLText texture " + textureSize + "x" + textureSize + "(GL_MAX_TEXTURE_SIZE:${textureMaxSize[0]}; cell:${cellWidth}x${cellHeight}; cell_count:${getGLCharsMapSize()}; font_size:${size}; pad_x:${padX}; pad_y:${padY};)")
         GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, 0)
 
         canvas!!.setBitmap(null)

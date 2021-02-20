@@ -6,6 +6,7 @@
 package com.fromfinalform.blocks.presentation.model.repository
 
 import android.content.Context
+import android.util.Log
 import com.fromfinalform.blocks.presentation.model.graphics.text.GLTextTexture
 import com.fromfinalform.blocks.presentation.model.graphics.text.TextStyle
 import com.fromfinalform.blocks.presentation.model.graphics.texture.ITextTextureRepository

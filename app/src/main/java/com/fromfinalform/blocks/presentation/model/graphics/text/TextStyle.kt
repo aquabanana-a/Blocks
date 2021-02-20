@@ -3,6 +3,7 @@ package com.fromfinalform.blocks.presentation.model.graphics.text
 import android.view.Gravity
 import android.view.View
 import java.io.Serializable
+import java.util.*
 
 data class TextStyle(
     var text: String,
@@ -50,6 +51,14 @@ data class TextStyle(
         return ret
     }
 
-    // !Note: equals & hashCode we take from internal impl data class
+//    override fun hashCode(): Int {
+//        return super.hashCode()// + Objects.hash(lineSpaceMultiplier, innerGravity, paddingLeft, paddingTop, paddingRight, paddingBottom)
+//    }
+
+//    override fun equals(other: Any?): Boolean {
+//        var hc = hashCode()
+//        var hco = other?.hashCode()
+//        return this === other || hc == hco
+//    }
 
 }

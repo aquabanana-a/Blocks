@@ -5,37 +5,33 @@
 
 package com.fromfinalform.blocks.presentation.mapper
 
+import android.graphics.PointF
 import com.fromfinalform.blocks.domain.model.game.`object`.GameObject
+import com.fromfinalform.blocks.domain.model.game.`object`.animation.GameObjectAnimationTypeId
+import com.fromfinalform.blocks.presentation.model.graphics.animation.TranslateTo
 import com.fromfinalform.blocks.presentation.model.graphics.drawer.ShaderDrawerTypeId
+import com.fromfinalform.blocks.presentation.model.graphics.renderer.RenderParams
 import com.fromfinalform.blocks.presentation.model.graphics.renderer.SceneParams
 import com.fromfinalform.blocks.presentation.model.graphics.renderer.unit.IRenderItem
 import com.fromfinalform.blocks.presentation.model.graphics.renderer.unit.RenderUnit
-import com.fromfinalform.blocks.presentation.model.graphics.texture.ITextTextureRepository
-import com.fromfinalform.blocks.presentation.model.graphics.texture.ITextureRepository
-import com.fromfinalform.blocks.presentation.model.repository.TextTextureRepository
-import com.fromfinalform.blocks.presentation.model.repository.TextureRepository
-import com.fromfinalform.blocks.presentation.view.App
-import io.instories.core.render.resolver.GLTextResolver
+import com.fromfinalform.blocks.presentation.model.graphics.text.resolver.GLTextResolver
 
 class GraphicsMapper {
     companion object {
 
-        private var textureRepo: ITextureRepository = TextureRepository(App.getApplicationContext())
-        private var textTextureRepo: ITextTextureRepository = TextTextureRepository(App.getApplicationContext())
-
-        fun List<GameObject>.toRenderUnit(params: SceneParams) = this?.map { it.toRenderUnit(params) }
-        fun GameObject.toRenderUnit(params: SceneParams): RenderUnit {
+        fun List<GameObject>.toRenderUnit(renderParams: RenderParams, sceneParams: SceneParams) = this?.map { it.toRenderUnit(renderParams, sceneParams) }
+        fun GameObject.toRenderUnit(renderParams: RenderParams, sceneParams: SceneParams): RenderUnit {
             return RenderUnit().also {
                 it.withId(this.id)
-                it.map(this, params)
+                it.map(this, renderParams, sceneParams)
 
                 if (this.childs != null)
                     for (c in ArrayList(this.childs))
-                        it.addChild(c.toRenderUnit(params))
+                        it.addChild(c.toRenderUnit(renderParams, sceneParams))
             }
         }
 
-        fun IRenderItem.map(src: GameObject?, params: SceneParams) {
+        fun IRenderItem.map(src: GameObject?, renderParams: RenderParams, sceneParams: SceneParams) {
             if (src == null)
                 return
 
@@ -43,20 +39,31 @@ class GraphicsMapper {
             if (ru == null)
                 return
 
-            ru.setLayout(-1 + src.x * params.sx, 1 - src.y * params.sy, src.width * params.sx, src.height * params.sy, src.rotation, src.alpha)
+            val sceneXY = PointF(src.x, src.y).toScene(sceneParams)
+            ru.setLayout(sceneXY.x, sceneXY.y, src.width * sceneParams.sx, src.height * sceneParams.sy, src.rotation, src.alpha)
 
             if (src.textStyle != null) {
                 ru.withShader(ShaderDrawerTypeId.TEXT)
-                ru.withTextResolver(GLTextResolver(textTextureRepo[src.textStyle!!], params))
+                ru.withTextResolver(GLTextResolver(renderParams.repos.textTexture[src.textStyle!!], sceneParams))
             } else if (src.assetId != null) {
                 ru.withShader(ShaderDrawerTypeId.FLAT)
-                ru.withTexture(textureRepo[src.assetId!!])
+                ru.withTexture(renderParams.repos.texture[src.assetId!!])
             } else if (src.color != null) {
                 ru.withShader(ShaderDrawerTypeId.SOLID)
                 ru.withColor(src.color!!)
             }
 
-            ru.childs?.forEach { ric -> ric.map(src.childs?.firstOrNull { goc -> goc.id == ric.id }, params) }
+            src.animations?.toList()?.forEach {
+                if (it.typeId == GameObjectAnimationTypeId.TRANSLATE) {
+                    ru.addAnimation(TranslateTo(it.dstXY.toScene(sceneParams), it.speed, interpolator = it.interpolator))
+                }
+            }
+
+            //ru.childs?.forEach { ric -> ric.map(src.childs?.firstOrNull { goc -> goc.id == ric.id }, params) }
+        }
+
+        fun PointF.toScene(params: SceneParams): PointF {
+            return PointF(-1 + x * params.sx, 1 - y * params.sy)
         }
     }
 }

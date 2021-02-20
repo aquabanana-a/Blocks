@@ -7,6 +7,8 @@ package com.fromfinalform.blocks.presentation.presenter
 
 import android.graphics.PointF
 import android.opengl.GLSurfaceView
+import android.util.Log
+import android.view.Gravity
 import android.view.View
 import android.view.animation.BounceInterpolator
 import android.view.animation.LinearInterpolator
@@ -14,6 +16,8 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.OnLifecycleEvent
+import com.fromfinalform.blocks.R
+import com.fromfinalform.blocks.domain.interactor.BlockBuilder
 import com.fromfinalform.blocks.domain.model.game.IGameLooper
 import com.fromfinalform.blocks.domain.model.game.configuration.IGameConfig
 import com.fromfinalform.blocks.presentation.dagger.DaggerGameComponent
@@ -25,6 +29,7 @@ import com.fromfinalform.blocks.presentation.model.graphics.animation.RotateBy
 import com.fromfinalform.blocks.presentation.model.graphics.animation.TranslateTo
 import com.fromfinalform.blocks.presentation.model.graphics.renderer.*
 import com.fromfinalform.blocks.presentation.model.graphics.renderer.unit.RenderUnit
+import com.fromfinalform.blocks.presentation.model.graphics.text.TextStyle
 import com.fromfinalform.blocks.presentation.model.graphics.texture.ITextureRepository
 import com.fromfinalform.blocks.presentation.model.repository.ShaderDrawerRepository
 import com.fromfinalform.blocks.presentation.model.repository.TextureRepository
@@ -58,7 +63,6 @@ class GamePresenter : MvpPresenter<GamePresenter.GameView>(), LifecycleObserver 
     @Inject protected lateinit var gameConfig: IGameConfig
 
     private lateinit var glViewRenderer: ViewRenderer
-    private /*lateinit*/ var textureRepo: ITextureRepository = TextureRepository(App.getApplicationContext())
 
     private fun postGl(handler: ()->Unit) {
         if(viewProperty == null)
@@ -70,15 +74,15 @@ class GamePresenter : MvpPresenter<GamePresenter.GameView>(), LifecycleObserver 
         gameLooper.start()
     } }
 
-    fun stopGame() {
+    fun stopGame() { postGl {
 
-    }
+    } }
 
     override fun onFirstViewAttach() {
 
     }
 
-    var ru2: RenderUnit? = null
+    lateinit var sceneParams: SceneParams
 
     @OnLifecycleEvent(Lifecycle.Event.ON_CREATE)
     private fun onCreate(owner: LifecycleOwner) {
@@ -89,7 +93,6 @@ class GamePresenter : MvpPresenter<GamePresenter.GameView>(), LifecycleObserver 
             .withUpdater { viewState.requestRender() }
             .withListener(object : RendererListener {
 
-                lateinit var sceneParams: SceneParams
 
                 override fun onFirstFrame() {
 
@@ -102,49 +105,65 @@ class GamePresenter : MvpPresenter<GamePresenter.GameView>(), LifecycleObserver 
                 override fun onFrame(renderParams: RenderParams, sceneParams: SceneParams) {
                     gameLooper.objectsDirtyFlat.forEach {
                         val ru = glViewRenderer.getRenderUnit(it.id)
-                        ru?.map(it, sceneParams)
+                        if (ru != null) {
+                            if (it.isWaitForRemove) {
+                                if (ru.parent != null)
+                                    ru.parent!!.removeChild(ru.id)
+                                else
+                                    glViewRenderer.removeRenderUnit(ru.id)
+                                it.onRemoved()
+                            }
+                            else
+                                ru.map(it, renderParams, sceneParams)
+                        }
+                        else if (it.parent == null)
+                            glViewRenderer.add(it.toRenderUnit(renderParams, sceneParams))
                         it.onDrawn()
                     }
+
+                    gameLooper.onFrameDrawn(renderParams, sceneParams)
                 }
 
-                override fun onSceneConfigured(params: SceneParams) {
+                override fun onSceneConfigured(renderRepo: RenderRepo, params: SceneParams) {
                     viewState.onSceneConfigured(params)
 
-                    this.sceneParams = params
+                    sceneParams = params
 
                     gameLooper.init()
-                    gameLooper.withObjectsCountChangedListener { toAdd, toRemove ->
-                        if (toAdd != null) {
-                            val ru = toAdd.toRenderUnit(sceneParams).first()
-                            ru.withLocation(-1f, 1f)
-                            ru.addAnimation(Alpha(1f, 0f, 500, interpolator = LinearInterpolator()))
-                            ru.addAnimation(TranslateTo(PointF(0.5f, -0.6f), 0.0005f, interpolator = BounceInterpolator()))
-                            ru.addAnimation(RotateBy(900f, 0.1f, interpolator = BounceInterpolator()))
-                            glViewRenderer.add(ru)
-                        }
-                    }
-                    viewProperty!!.surfaceView.setOnTouchListener { v, me -> gameLooper.onTouch(me, params) }
 
-                    RenderUnit.shaderRepo = ShaderDrawerRepository().apply { initialize() }
+                    viewProperty!!.surfaceView.setOnTouchListener { v, me -> gameLooper.onTouch(me, params) }
 
                     var cw = gameConfig.blockWidthPx * sceneParams.sx
                     var ch = gameConfig.blockHeightPx * sceneParams.sy
 
-                    glViewRenderer.clearRenderUnits()
-
-//                    ru = ClassicGameFieldBackground().build(gameConfig).toRenderUnit(sceneParams)
-//                    glViewRenderer.add(ru!!)
+//                    var sm = System.currentTimeMillis()
+//                    var ts = TextStyle("512", 28f, R.font.jura_bold, 0xFFFFFFFF, 0xFFFF0000).withInnerGravity(Gravity.CENTER)
+//                    var texture = renderRepo.textTexture[ts]
+//                    var tm = System.currentTimeMillis() - sm
 //
-//                    go = BlockBuilder(gameConfig).withTypeId(BlockTypeId._128).build()
-////                    go!!.translateX(config.blockGapHPx)
-////                    go!!.translateX(config.fieldWidthPx / 2)
-////                    go!!.translateY(config.fieldHeightPx / 2)
-//                    ru2 = go!!.toRenderUnit(sceneParams)
-//                    ru2!!.translateXY(0f, 0f)
+//                    Log.d("mymy", "#1 GLText load time: ${tm}ms")
 //
-//                    pt = PointF(ru2!!.x, ru2!!.y)
+//                    sm = System.currentTimeMillis()
+//                    ts = TextStyle("128", 20f, R.font.airfool, 0xFFFFFF00, 0xFFFF0000).withInnerGravity(Gravity.CENTER)
+//                    texture = renderRepo.textTexture[ts]
+//                    tm = System.currentTimeMillis() - sm
+//
+//                    Log.d("mymy", "#2 GLText load time: ${tm}ms")
+//
+//                    sm = System.currentTimeMillis()
+//                    ts = TextStyle("1024", 24f, R.font.comfortaa_regular, 0xFFF4FF09, 0xFFFF0000).withInnerGravity(Gravity.CENTER)
+//                    texture = renderRepo.textTexture[ts]
+//                    tm = System.currentTimeMillis() - sm
+//
+//                    Log.d("mymy", "#3 GLText load time: ${tm}ms")
+//
+//                    sm = System.currentTimeMillis()
+//                    ts = TextStyle("128", 20f, R.font.airfool, 0xFFFFFF00, 0xFFFF0000).withInnerGravity(Gravity.CENTER)
+//                    texture = renderRepo.textTexture[ts]
+//                    tm = System.currentTimeMillis() - sm
+//
+//                    Log.d("mymy", "#4 GLText load time: ${tm}ms")
 
-                    glViewRenderer.add(gameLooper.objects.toRenderUnit(sceneParams))
                 }
             })
 

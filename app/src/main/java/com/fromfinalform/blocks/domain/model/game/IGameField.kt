@@ -5,7 +5,11 @@
 
 package com.fromfinalform.blocks.domain.model.game
 
+import android.graphics.PointF
 import android.view.MotionEvent
+import com.fromfinalform.blocks.domain.model.game.`object`.GameObject
+import com.fromfinalform.blocks.domain.model.game.`object`.block.Block
+import com.fromfinalform.blocks.presentation.model.graphics.renderer.RenderParams
 import com.fromfinalform.blocks.presentation.model.graphics.renderer.SceneParams
 
 interface IGameField : IGameObjectsHolder {
@@ -14,10 +18,12 @@ interface IGameField : IGameObjectsHolder {
 
     fun init()
 
-    fun highlightColumn(index: Int, value: Boolean = true)
+    fun onFrameDrawn(renderParams: RenderParams, sceneParams: SceneParams)
 
-//    fun canBePlaced(block: Block, column: Int): Boolean
-//    fun placeTo(block: Block, column: Int)
-//
-//    fun clear()
+    fun withColumnTouchdownListener(handler: ((columnIndex: Int, columnXY: PointF)->Boolean/*valid*/)?=null): IGameField
+
+    fun canBePlaced(block: Block, column: Int): Boolean
+    fun placeTo(block: Block, column: Int)
+
+    fun clear()
 }

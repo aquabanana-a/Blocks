@@ -262,6 +262,8 @@ open class RenderItem(
             .withShader(shaderTypeId)
             .withBlendFactor(blendSrc, blendDst)
             .withBlendSeparate(blendSrcRGB, blendDstRGB, blendSrcAlpha, blendDstAlpha)
-            .withChilds(childs)
+            .withChilds(childs).also {
+                it.parent = parent
+            }
     } }
 }

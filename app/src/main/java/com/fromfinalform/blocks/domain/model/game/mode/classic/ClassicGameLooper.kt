@@ -5,14 +5,22 @@
 
 package com.fromfinalform.blocks.domain.model.game.mode.classic
 
+import android.graphics.PointF
 import android.view.MotionEvent
+import android.view.animation.AccelerateDecelerateInterpolator
+import android.view.animation.AccelerateInterpolator
+import android.view.animation.DecelerateInterpolator
+import com.fromfinalform.blocks.common.clone
 import com.fromfinalform.blocks.domain.interactor.BlockBuilder
 import com.fromfinalform.blocks.domain.model.game.IGameField
 import com.fromfinalform.blocks.domain.model.game.IGameLooper
 import com.fromfinalform.blocks.domain.model.game.`object`.GameObject
+import com.fromfinalform.blocks.domain.model.game.`object`.animation.GameObjectAnimation
+import com.fromfinalform.blocks.domain.model.game.`object`.animation.GameObjectAnimationTypeId
 import com.fromfinalform.blocks.domain.model.game.`object`.block.Block
 import com.fromfinalform.blocks.domain.model.game.`object`.block.BlockTypeId
 import com.fromfinalform.blocks.domain.model.game.configuration.IGameConfig
+import com.fromfinalform.blocks.presentation.model.graphics.renderer.RenderParams
 import com.fromfinalform.blocks.presentation.model.graphics.renderer.SceneParams
 import javax.inject.Inject
 
@@ -35,18 +43,29 @@ class ClassicGameLooper : IGameLooper {
 
     override fun init() {
         field.init()
+        field.withColumnTouchdownListener { index, location ->
+
+            var go = BlockBuilder(config)
+                .withRandomTypeId()
+                .build()
+
+            field.placeTo(go, index)
+
+            true
+        }
     }
 
     override fun start() {
-        var go = BlockBuilder(config)
-            .withTypeId(BlockTypeId._512)
-            .build()
+        field.clear()
 
-        objectsCountChanged?.invoke(arrayListOf(go), null)
     }
 
     override fun stop() {
         TODO("Not yet implemented")
+    }
+
+    override fun onFrameDrawn(renderParams: RenderParams, sceneParams: SceneParams) {
+        field.onFrameDrawn(renderParams, sceneParams)
     }
 
     override fun onTouch(me: MotionEvent, sp: SceneParams): Boolean {
@@ -57,7 +76,8 @@ class ClassicGameLooper : IGameLooper {
         val ret = arrayListOf<GameObject>()
         list?.forEach {
             if (it.isDirty) ret.add(it)
-            ret.addAll(getDirtyFlatList(it.childs))
+            val sl = getDirtyFlatList(it.childs)
+            if (sl.isNotEmpty()) ret.addAll(sl)
         }
         return ret
     }

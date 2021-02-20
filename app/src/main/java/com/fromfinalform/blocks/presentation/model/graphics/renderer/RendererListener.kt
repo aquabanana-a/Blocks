@@ -12,5 +12,5 @@ interface RendererListener {
     fun onStop()
     fun onCrash()
 
-    fun onSceneConfigured(params: SceneParams)
+    fun onSceneConfigured(renderRepo: RenderRepo, params: SceneParams)
 }

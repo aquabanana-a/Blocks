@@ -33,8 +33,8 @@ class SolidShaderDrawer() : IShaderDrawer {
         """
 
     override val FRAGMENT_SHADER = """
-        /*precision mediump float;*/
-        precision highp float;
+        precision mediump float;
+        /*precision highp float;*/
         uniform vec4 uColor;
         
         void main() {

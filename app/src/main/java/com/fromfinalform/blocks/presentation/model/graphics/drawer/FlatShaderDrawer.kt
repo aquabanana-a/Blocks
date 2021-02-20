@@ -34,8 +34,8 @@ class FlatShaderDrawer() : IShaderDrawer {
         """
 
     override val FRAGMENT_SHADER = """
-        /*precision mediump float;*/
-        precision highp float;
+        precision mediump float;
+        /*precision highp float;*/
         varying vec2 vTextureCoord;
         uniform sampler2D sTexture;
         uniform float uAlpha;

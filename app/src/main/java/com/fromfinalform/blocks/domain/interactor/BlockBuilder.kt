@@ -24,18 +24,25 @@ class BlockBuilder(val config: IGameConfig) {
         return this
     }
 
+    fun withRandomTypeId(): BlockBuilder {
+        this.typeId = blockTypeRepo.getRandom().id
+        return this
+    }
+
     fun build(): Block {
+        val type = blockTypeRepo[typeId]
+
         val ret = Block(typeId)
         ret.width = config.blockWidthPx
         ret.height = config.blockHeightPx
-        ret.color = blockTypeRepo[typeId].bgColor
+        ret.color = type.bgColor
 
-        ret.childs = arrayListOf(GameObject().apply {
+        ret.add(GameObject().apply {
             x = ret.width / 2
             y = ret.height / 2
             width = ret.width/2
             height = ret.height/2
-            textStyle = TextStyle(typeId.toString(), 28f, R.font.jura_bold, 0xFFFFFFFF, 0xFFFF0000).withInnerGravity(Gravity.CENTER)
+            textStyle = TextStyle(typeId.toString(), 28f, R.font.jura_bold, type.txtColor, 0xFFFF0000).withInnerGravity(Gravity.CENTER)
         })
 
         return ret

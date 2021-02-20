@@ -6,23 +6,16 @@
 package com.fromfinalform.blocks.presentation.model.graphics.renderer.unit
 
 import android.opengl.GLES20
-import com.fromfinalform.blocks.presentation.model.graphics.animation.IGLAnimation
 import com.fromfinalform.blocks.presentation.model.graphics.animation.IGLCompletableAnimation
-import com.fromfinalform.blocks.presentation.model.graphics.drawer.IShaderDrawerRepository
 import com.fromfinalform.blocks.presentation.model.graphics.drawer.ShaderDrawerTypeId
 import com.fromfinalform.blocks.presentation.model.graphics.renderer.IRenderer
 import com.fromfinalform.blocks.presentation.model.graphics.renderer.RenderParams
 import com.fromfinalform.blocks.presentation.model.graphics.renderer.SceneParams
 import com.fromfinalform.blocks.presentation.model.graphics.renderer.data.GLColor
 import com.fromfinalform.blocks.presentation.model.graphics.renderer.data.GLGradient
-import io.instories.core.render.resolver.GLTextResolver
-import kotlinx.coroutines.launch
+import com.fromfinalform.blocks.presentation.model.graphics.text.resolver.GLTextResolver
 
 class RenderUnit : RenderItem(), IRenderUnit {
-
-    companion object {
-        var shaderRepo: IShaderDrawerRepository? = null
-    }
 
     private var textResolver: GLTextResolver? = null
     fun withTextResolver(value: GLTextResolver): RenderUnit {
@@ -35,7 +28,7 @@ class RenderUnit : RenderItem(), IRenderUnit {
     }
 
     private fun renderImpl(item: RenderItem, renderer: IRenderer, renderParams: RenderParams, sceneParams: SceneParams, parent: RenderItem? = null) {
-        val drawer = shaderRepo!![item.shaderTypeId]
+        val drawer = renderParams.repos.shader[item.shaderTypeId]
 
         val animationsToRemove = arrayListOf<IGLCompletableAnimation>()
         item.animations?.toList()?.forEach {
@@ -47,8 +40,11 @@ class RenderUnit : RenderItem(), IRenderUnit {
         }
 
         if (animationsToRemove.size > 0) {
-            animationsToRemove.forEach { item.removeAnimation(it) }
-            renderer.scope.launch { animationsToRemove.forEach { it.completeHandler?.invoke(item, renderParams, sceneParams) } }
+            animationsToRemove.forEach {
+                item.removeAnimation(it)
+                it.completeHandler?.invoke(item, renderParams, sceneParams)
+            }
+            //renderer.scope.launch { animationsToRemove.forEach { it.completeHandler?.invoke(item, renderParams, sceneParams) } }
         }
 
         when (item.shaderTypeId) {
