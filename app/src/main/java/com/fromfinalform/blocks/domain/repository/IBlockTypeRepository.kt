@@ -12,5 +12,5 @@ interface IBlockTypeRepository {
     fun initialize()
     operator fun get(typeId: BlockTypeId): BlockType
 
-    fun getRandom(): BlockType
+    fun getRandom(exclude: List<BlockTypeId>? = null): BlockType
 }

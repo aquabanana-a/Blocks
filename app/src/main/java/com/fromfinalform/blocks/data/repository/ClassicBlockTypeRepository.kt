@@ -36,17 +36,17 @@ class ClassicBlockTypeRepository : IBlockTypeRepository {
     }
 
     override fun initialize() {
-        add(BlockType(_2, 0xFF757575, 0xFFFFFFFF))
-        add(BlockType(_4, 0xFFE0B4B5, 0xFFFFFFFF))
-        add(BlockType(_8, 0xFFB77775, 0xFFFFFFFF))
-        add(BlockType(_16, 0xFF774965, 0xFFFFFFFF))
-        add(BlockType(_32, 0xFFE8B077, 0xFFFFFFFF))
-        add(BlockType(_64, 0xFF886C44, 0xFFFFFFFF))
-        add(BlockType(_128, 0xFFC4B07B, 0xFFFFFFFF))
-        add(BlockType(_256, 0xFF9F57AF, 0xFFFFFFFF))
-        add(BlockType(_512, 0xFF7163CC, 0xFFFFFFFF))
-        add(BlockType(_1024, 0xFF62AD4C, 0xFFFFFFFF))
-        add(BlockType(_2048, 0xFF4995AA, 0xFFFFFFFF))
+        add(BlockType(_2, 0xFF757575, 0xFFFFFFFF,       3))
+        add(BlockType(_4, 0xFFE0B4B5, 0xFFFFFFFF,       3))
+        add(BlockType(_8, 0xFFB77775, 0xFFFFFFFF,       3))
+        add(BlockType(_16, 0xFF774965, 0xFFFFFFFF,      2))
+        add(BlockType(_32, 0xFFE8B077, 0xFFFFFFFF,      2))
+        add(BlockType(_64, 0xFF886C44, 0xFFFFFFFF,      2))
+        add(BlockType(_128, 0xFFC4B07B, 0xFFFFFFFF,     1))
+        add(BlockType(_256, 0xFF9F57AF, 0xFFFFFFFF,     1))
+        add(BlockType(_512, 0xFF7163CC, 0xFFFFFFFF,     0))
+        add(BlockType(_1024, 0xFF62AD4C, 0xFFFFFFFF,    0))
+        add(BlockType(_2048, 0xFF4995AA, 0xFFFFFFFF,    0))
 
         blocksByTypeId.values.forEach {
             for (i in 0 until it.chanceCoeff)
@@ -55,8 +55,15 @@ class ClassicBlockTypeRepository : IBlockTypeRepository {
         rndChancedList.shuffle()
     }
 
-    override fun getRandom(): BlockType {
+    override fun getRandom(exclude: List<BlockTypeId>?): BlockType {
+        if (exclude?.containsAll(blocksByTypeId.keys) == true)
+            throw IllegalArgumentException()
+
         val index = (rnd.nextInt(0, rndChancedList.size * 1000) / 1000f).toInt().coerceIn(0, rndChancedList.size-1)
-        return get(rndChancedList[index])
+        val bti = rndChancedList[index]
+        if (exclude?.contains(bti) == true)
+            return getRandom(exclude)
+
+        return get(bti)
     }
 }

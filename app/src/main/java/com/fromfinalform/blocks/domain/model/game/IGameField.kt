@@ -22,7 +22,7 @@ interface IGameField : IGameObjectsHolder {
 
     fun withColumnTouchdownListener(handler: ((columnIndex: Int, columnXY: PointF)->Boolean/*valid*/)?=null): IGameField
 
-    fun canBePlaced(block: Block, column: Int): Boolean
+    fun canBePlaced(block: Block?, column: Int): Boolean
     fun placeTo(block: Block, column: Int)
 
     fun clear()

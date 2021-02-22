@@ -19,7 +19,9 @@ import androidx.lifecycle.OnLifecycleEvent
 import com.fromfinalform.blocks.R
 import com.fromfinalform.blocks.domain.interactor.BlockBuilder
 import com.fromfinalform.blocks.domain.model.game.IGameLooper
+import com.fromfinalform.blocks.domain.model.game.`object`.block.BlockType
 import com.fromfinalform.blocks.domain.model.game.configuration.IGameConfig
+import com.fromfinalform.blocks.domain.repository.IBlockTypeRepository
 import com.fromfinalform.blocks.presentation.dagger.DaggerGameComponent
 import com.fromfinalform.blocks.presentation.dagger.GameComponent
 import com.fromfinalform.blocks.presentation.mapper.GraphicsMapper.Companion.map
@@ -53,6 +55,8 @@ class GamePresenter : MvpPresenter<GamePresenter.GameView>(), LifecycleObserver 
         @StateStrategyType(value = AddToEndSingleStrategy::class) fun setRenderMode(mode: Int)
 
         @StateStrategyType(value = AddToEndSingleStrategy::class) fun onSceneConfigured(params: SceneParams)
+
+        @StateStrategyType(value = AddToEndSingleStrategy::class) fun onCurrentBlockChanged(type: BlockType?)
     }
 
     val viewProperty get(): GamePropertyView? = attachedViews.firstOrNull { it is GamePropertyView } as? GamePropertyView
@@ -60,7 +64,8 @@ class GamePresenter : MvpPresenter<GamePresenter.GameView>(), LifecycleObserver 
     val renderer: IRenderer get() = glViewRenderer
     private lateinit var gameComponent: GameComponent
     @Inject protected lateinit var gameLooper: IGameLooper
-    @Inject protected lateinit var gameConfig: IGameConfig
+    @Inject lateinit var gameConfig: IGameConfig
+    @Inject protected lateinit var blockTypeRepo: IBlockTypeRepository
 
     private lateinit var glViewRenderer: ViewRenderer
 
@@ -89,7 +94,7 @@ class GamePresenter : MvpPresenter<GamePresenter.GameView>(), LifecycleObserver 
         gameComponent = DaggerGameComponent.create()
         gameComponent.injectGamePresenter(this)
 
-        glViewRenderer = ViewRenderer(0xFF20242F, Size(gameConfig.fieldWidthPx, gameConfig.fieldHeightPx))
+        glViewRenderer = ViewRenderer(0xFF20242F, Size(gameConfig.canvasWidthPx, gameConfig.canvasHeightPx))
             .withUpdater { viewState.requestRender() }
             .withListener(object : RendererListener {
 
@@ -130,6 +135,7 @@ class GamePresenter : MvpPresenter<GamePresenter.GameView>(), LifecycleObserver 
                     sceneParams = params
 
                     gameLooper.init()
+                    gameLooper.currentBlock.subscribe { viewState.onCurrentBlockChanged(if (it != null) blockTypeRepo[it.typeId] else null) }
 
                     viewProperty!!.surfaceView.setOnTouchListener { v, me -> gameLooper.onTouch(me, params) }
 

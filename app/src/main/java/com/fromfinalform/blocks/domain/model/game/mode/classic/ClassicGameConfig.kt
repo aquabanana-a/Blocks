@@ -17,10 +17,16 @@ class ClassicGameConfig : IGameConfig {
     override val blockGapHPx get() = 6f
     override val blockGapVPx get() = 6f
 
-    override val fieldWidth get() = 5
-    override val fieldHeight get() = 7
+    override val blockCurrGapTopPx get() = 40f
+    override val blockCurrGapBottomPx get() = 20f
 
-    override val fieldWidthPx get() = blockWidthPx * fieldWidth + blockGapHPx * (fieldWidth - 1)
-    override val fieldHeightPx get() = blockHeightPx * fieldHeight + blockGapVPx * (fieldHeight - 1)
+    override val fieldWidthBl get() = 5
+    override val fieldHeightBl get() = 7
+
+    override val fieldWidthPx get() = blockWidthPx * fieldWidthBl + blockGapHPx * (fieldWidthBl - 1)
+    override val fieldHeightPx get() = blockHeightPx * fieldHeightBl + blockGapVPx * (fieldHeightBl - 1)
+
+    override val canvasWidthPx get() = fieldWidthPx
+    override val canvasHeightPx get() = fieldHeightPx + blockCurrGapTopPx + blockGapVPx + blockGapVPx + blockHeightPx + blockGapVPx + blockCurrGapBottomPx
 
 }

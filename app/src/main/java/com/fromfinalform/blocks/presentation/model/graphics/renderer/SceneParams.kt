@@ -6,6 +6,8 @@
 package com.fromfinalform.blocks.presentation.model.graphics.renderer
 
 import android.graphics.PointF
+import kotlin.math.max
+import kotlin.math.min
 
 data class SceneParams(
     var sceneWidth: Float,
@@ -30,12 +32,17 @@ data class SceneParams(
     var screen2gly = 2f / scaledSceneHeight
     var relativeScale = 1f
 
+    var scaleInv: Float = 1f; private set
+
     val sceneWH: PointF get() = PointF(sceneWidth, sceneHeight)
     val isVertical: Boolean get() = scaledSceneHeight > scaledSceneWidth
     val isHorizontal: Boolean get() = scaledSceneWidth > scaledSceneHeight
 
-    fun update(size: ISize, scale: Float, surfaceWidth: Float, surfaceHeight: Float) {
-        this.scale = scale
+    fun update(size: ISize, surfaceWidth: Float, surfaceHeight: Float) {
+
+        scale = min(surfaceWidth / size.width, surfaceHeight / size.height)
+        scaleInv = max(size.width / surfaceWidth, size.height / surfaceHeight)
+
         this.surfaceWidth = surfaceWidth
         this.surfaceHeight = surfaceHeight
         sceneWidth = size.width

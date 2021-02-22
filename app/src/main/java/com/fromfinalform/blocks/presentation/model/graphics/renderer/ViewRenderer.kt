@@ -152,8 +152,7 @@ class ViewRenderer(clearColor: Long, override var sceneSize: ISize) : IRenderer 
     }
 
     private fun configureScene(canvasWidth: Int, canvasHeight: Int) {
-        var scale = min(canvasWidth / sceneSize.width, canvasHeight / sceneSize.height)
-        sceneParams.update(sceneSize, scale, sceneSize.width * scale, sceneSize.height * scale)
+        sceneParams.update(sceneSize, canvasWidth.toFloat(), canvasHeight.toFloat())
     }
 
     override fun requestRender() {

@@ -12,9 +12,15 @@ interface IGameConfig {
     val blockGapHPx: Float
     val blockGapVPx: Float
 
-    val fieldWidth: Int // in cells
-    val fieldHeight: Int
+    val blockCurrGapTopPx: Float
+    val blockCurrGapBottomPx: Float
+
+    val fieldWidthBl: Int // in cells
+    val fieldHeightBl: Int
 
     val fieldWidthPx: Float
     val fieldHeightPx: Float
+
+    val canvasWidthPx: Float
+    val canvasHeightPx: Float
 }

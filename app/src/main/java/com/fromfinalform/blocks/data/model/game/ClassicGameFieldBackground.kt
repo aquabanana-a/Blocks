@@ -16,7 +16,7 @@ class ClassicGameFieldBackground : IGameFieldBackground {
         val ret = GameObject()
         ret.childs = arrayListOf()
 
-        for (i in 0..config.fieldWidth) {
+        for (i in 0..config.fieldWidthBl) {
             val c = GameObject()
             c.x = i * config.blockWidthPx + (i + 1) * config.blockGapHPx
             c.width = config.blockWidthPx

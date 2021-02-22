@@ -33,8 +33,12 @@ class ClassicGameField : IGameField {
     override val objects: List<GameObject> get() = synchronized(itemsLo) { items.flatten().filterNotNull() + background }
 
     override fun init() { synchronized(itemsLo) {
-        background = GameObject()
-        for (column in 0 until config.fieldWidth) {
+        background = GameObject().apply {
+            width = config.fieldWidthPx
+            height = config.fieldHeightPx
+        }
+
+        for (column in 0 until config.fieldWidthBl) {
             val columnX = column * (config.blockWidthPx + config.blockGapHPx)
 
             background.add(GameObject().apply {
@@ -55,7 +59,7 @@ class ClassicGameField : IGameField {
         }
 
         items.clear()
-        for (column in 0 until config.fieldWidth)
+        for (column in 0 until config.fieldWidthBl)
             items.add(arrayListOf())
 
     } }
@@ -75,7 +79,7 @@ class ClassicGameField : IGameField {
         if (me.action == MotionEvent.ACTION_DOWN && highlightedColumn == null) {
             highlightedColumn = tryGetHighlightObject(me.x / sp.scale, me.y / sp.scale)
             if (highlightedColumn != null) {
-                if ((columnTouchdown?.invoke(highlightedColumn!!.tag as Int, PointF(highlightedColumn!!.x, highlightedColumn!!.y)) == false))
+                if (!canBePlaced(null, highlightedColumn!!.tag as Int) || columnTouchdown?.invoke(highlightedColumn!!.tag as Int, PointF(highlightedColumn!!.x, highlightedColumn!!.y)) == false)
                     highlightedColumn = null
                 else {
                     highlightedColumn!!.alpha = 1f
@@ -101,8 +105,8 @@ class ClassicGameField : IGameField {
         items.forEach { it.clearRemoved() }
     } }
 
-    override fun canBePlaced(block: Block, column: Int): Boolean { synchronized(itemsLo) {
-        if (column in 0 until config.fieldHeight && items[column].size < config.fieldHeight)
+    override fun canBePlaced(block: Block?, column: Int): Boolean { synchronized(itemsLo) {
+        if (column in 0 until config.fieldHeightBl && items[column].size < config.fieldHeightBl)
             return true
         return false
     } }
@@ -112,7 +116,7 @@ class ClassicGameField : IGameField {
         val columnItemsCount = items[columnIndex].size
         val dstXY = PointF(column.x, column.y + columnItemsCount * (config.blockHeightPx + config.blockGapVPx))
 
-        if (columnItemsCount >= config.fieldHeight)
+        if (columnItemsCount >= config.fieldHeightBl)
             return
 
         block.withLocation(column.x, config.fieldHeightPx + 1)

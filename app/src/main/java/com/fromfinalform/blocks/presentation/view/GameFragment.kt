@@ -5,18 +5,15 @@
 
 package com.fromfinalform.blocks.presentation.view
 
-import android.graphics.PointF
 import android.opengl.GLSurfaceView
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.animation.LinearInterpolator
 import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
 import com.fromfinalform.blocks.R
-import com.fromfinalform.blocks.presentation.model.graphics.animation.*
-import com.fromfinalform.blocks.presentation.model.graphics.interpolator.BounceInterpolator
+import com.fromfinalform.blocks.domain.model.game.`object`.block.BlockType
 import com.fromfinalform.blocks.presentation.model.graphics.opengl.EGL10ContextFactory
 import com.fromfinalform.blocks.presentation.model.graphics.renderer.SceneParams
 import com.fromfinalform.blocks.presentation.presenter.GamePresenter
@@ -28,6 +25,7 @@ class GameFragment : MvpAppCompatFragment(), GamePresenter.GameView, GamePresent
 
     private lateinit var vRoot: ConstraintLayout
     private lateinit var vgCanvasGroup: ConstraintLayout
+    private lateinit var vgPanelBottomGroup: ConstraintLayout
     private lateinit var vHGap: View
     private lateinit var glSurface: GLSurfaceView
     private lateinit var tvStatus: TextView
@@ -48,7 +46,8 @@ class GameFragment : MvpAppCompatFragment(), GamePresenter.GameView, GamePresent
         vRoot = inflater.inflate(R.layout.fragment_game, container, false) as ConstraintLayout
 
         vgCanvasGroup = vRoot.findViewById(R.id.vg_canvas_group)
-        vHGap = vRoot.findViewById(R.id.v_hgap)
+        vgPanelBottomGroup = vRoot.findViewById(R.id.vg_panel_bottom)
+//        vHGap = vRoot.findViewById(R.id.v_hgap)
 
         glSurface = vRoot.findViewById(R.id.gl_surface)
         glSurface.setEGLContextFactory(EGL10ContextFactory())
@@ -94,15 +93,36 @@ class GameFragment : MvpAppCompatFragment(), GamePresenter.GameView, GamePresent
             return
 
         vRoot.post {
-            val appPadding = (2 + 2).dp
-            val mainFramePadding = (14 + 14).dp
-            val canvasFramePadding = (4 + 4).dp
+            var lp = vgCanvasGroup.layoutParams as ConstraintLayout.LayoutParams
+            lp.width = params.scaledSceneWidth.toInt() //+ canvasFramePadding
+            lp.height = params.scaledSceneHeight.toInt() //+ canvasFramePadding
+            vgCanvasGroup.layoutParams = lp
 
-            val clp = vgCanvasGroup.layoutParams as ConstraintLayout.LayoutParams
-            clp.width = params.scaledSceneWidth.toInt() + canvasFramePadding
-            clp.height = params.scaledSceneHeight.toInt() + canvasFramePadding
-            vgCanvasGroup.layoutParams = clp
+            var vgPanel_vMid = vgPanelBottomGroup.findViewById<View>(R.id.v_mid)
+            lp = vgPanel_vMid.layoutParams as ConstraintLayout.LayoutParams
+            lp.width = ((2f * presenter.gameConfig.blockGapHPx + presenter.gameConfig.blockWidthPx) / params.scaleInv).toInt()
+            vgPanel_vMid.layoutParams = lp
+
+            var vgPanel_vTop = vgPanelBottomGroup.findViewById<View>(R.id.v_top)
+            lp = vgPanel_vTop.layoutParams as ConstraintLayout.LayoutParams
+            lp.height = (presenter.gameConfig.blockCurrGapTopPx / params.scaleInv).toInt()
+            vgPanel_vTop.layoutParams = lp
+
+            var vgPanel_vBottom = vgPanelBottomGroup.findViewById<View>(R.id.v_bottom)
+            lp = vgPanel_vBottom.layoutParams as ConstraintLayout.LayoutParams
+            lp.height = (presenter.gameConfig.blockCurrGapBottomPx / params.scaleInv).toInt()
+            vgPanel_vBottom.layoutParams = lp
+
+            lp = vgPanelBottomGroup.layoutParams as ConstraintLayout.LayoutParams
+            lp.height = ((presenter.gameConfig.blockHeightPx + presenter.gameConfig.blockGapVPx + presenter.gameConfig.blockGapVPx + presenter.gameConfig.blockCurrGapTopPx + presenter.gameConfig.blockCurrGapBottomPx) / params.scaleInv).toInt()
+            vgPanelBottomGroup.layoutParams = lp
         }
         sceneConfigured = true
+    }
+
+    override fun onCurrentBlockChanged(type: BlockType?) {
+        vRoot.post {
+            tvStatus.text = "NEXT_BLOCK: ${type?.id}"
+        }
     }
 }

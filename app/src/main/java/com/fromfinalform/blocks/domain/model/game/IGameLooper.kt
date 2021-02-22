@@ -10,12 +10,13 @@ import com.fromfinalform.blocks.domain.model.game.`object`.GameObject
 import com.fromfinalform.blocks.domain.model.game.`object`.block.Block
 import com.fromfinalform.blocks.presentation.model.graphics.renderer.RenderParams
 import com.fromfinalform.blocks.presentation.model.graphics.renderer.SceneParams
+import io.reactivex.rxjava3.subjects.BehaviorSubject
 
 interface IGameLooper : IGameObjectsHolder {
 
     val objectsDirtyFlat: List<GameObject>
 
-    val nextBlock: Block?
+    val currentBlock: BehaviorSubject<Block?>
 
     fun onTouch(me: MotionEvent, sp: SceneParams): Boolean
 
