@@ -36,17 +36,17 @@ class ClassicBlockTypeRepository : IBlockTypeRepository {
     }
 
     override fun initialize() {
-        add(BlockType(_2, 0xFF757575, 0xFFFFFFFF,       3))
-        add(BlockType(_4, 0xFFE0B4B5, 0xFFFFFFFF,       3))
-        add(BlockType(_8, 0xFFB77775, 0xFFFFFFFF,       3))
-        add(BlockType(_16, 0xFF774965, 0xFFFFFFFF,      2))
-        add(BlockType(_32, 0xFFE8B077, 0xFFFFFFFF,      2))
-        add(BlockType(_64, 0xFF886C44, 0xFFFFFFFF,      2))
-        add(BlockType(_128, 0xFFC4B07B, 0xFFFFFFFF,     1))
-        add(BlockType(_256, 0xFF9F57AF, 0xFFFFFFFF,     1))
-        add(BlockType(_512, 0xFF7163CC, 0xFFFFFFFF,     0))
-        add(BlockType(_1024, 0xFF62AD4C, 0xFFFFFFFF,    0))
-        add(BlockType(_2048, 0xFF4995AA, 0xFFFFFFFF,    0))
+        add(BlockType(_2, 0xFF757575, 0xFF7F7F7F, 0xFFFFFFFF, 0xFF595959,      chanceCoeff = 3))
+        add(BlockType(_4, 0xFFE0B4B5, 0xFFEABEBF, 0xFF000000, 0xFFC49FA0,      chanceCoeff = 3))
+        add(BlockType(_8, 0xFFB77775, 0xFFC17D7C, 0xFF000000, 0xFF9B6463,      chanceCoeff = 3))
+        add(BlockType(_16, 0xFF774965, 0xFF82506F, 0xFFFFFFFF, 0xFF5B384E,     chanceCoeff = 2))
+        add(BlockType(_32, 0xFFE8B077, 0xFFF2B87D, 0xFF000000, 0xFFCC9B6A,     chanceCoeff = 2))
+        add(BlockType(_64, 0xFF886C44, 0xFF937549, 0xFFFFFFFF, 0xFF6D5636,     chanceCoeff = 2))
+        add(BlockType(_128, 0xFFC4B07B, 0xFFCEB882, 0xFF000000, 0xFFA8966A,    chanceCoeff = 1))
+        add(BlockType(_256, 0xFF9F57AF, 0xFFA95DBA, 0xFFFFFFFF, 0xFF864993,    chanceCoeff = 1))
+        add(BlockType(_512, 0xFF7163CC, 0xFF776AD8, 0xFFFFFFFF, 0xFF6257B2,    chanceCoeff = 0))
+        add(BlockType(_1024, 0xFF62AD4C, 0xFF68B750, 0xFF000000, 0xFF52913F,   chanceCoeff = 0))
+        add(BlockType(_2048, 0xFF4995AA, 0xFF4DA0B5, 0xFFFFFFFF, 0xFF3D7E8E,   chanceCoeff = 0))
 
         blocksByTypeId.values.forEach {
             for (i in 0 until it.chanceCoeff)

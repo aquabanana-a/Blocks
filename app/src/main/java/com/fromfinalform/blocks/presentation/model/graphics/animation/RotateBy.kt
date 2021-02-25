@@ -21,6 +21,5 @@ class RotateBy(override var delta: Float, speed: Float, startTimeMs: Long = 0L, 
 
     override fun clone(): RotateBy {
         return RotateBy(delta, speed, startTimeMs, interpolator)
-            .withOnComplete(completeHandler) as RotateBy
     }
 }

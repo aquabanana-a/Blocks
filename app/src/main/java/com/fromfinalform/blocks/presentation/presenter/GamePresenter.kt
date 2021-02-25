@@ -76,6 +76,7 @@ class GamePresenter : MvpPresenter<GamePresenter.GameView>(), LifecycleObserver 
     }
 
     fun startGame() { postGl {
+
         gameLooper.start()
     } }
 
@@ -97,10 +98,11 @@ class GamePresenter : MvpPresenter<GamePresenter.GameView>(), LifecycleObserver 
         glViewRenderer = ViewRenderer(0xFF20242F, Size(gameConfig.canvasWidthPx, gameConfig.canvasHeightPx))
             .withUpdater { viewState.requestRender() }
             .withListener(object : RendererListener {
-
-
                 override fun onFirstFrame() {
+                    gameLooper.init()
+                    gameLooper.currentBlock.subscribe { viewState.onCurrentBlockChanged(if (it != null) blockTypeRepo[it.typeId] else null) }
 
+                    viewProperty!!.surfaceView.setOnTouchListener { v, me -> gameLooper.onTouch(me, sceneParams) }
                 }
 
                 override fun onStart() { viewState.setRenderMode(GLSurfaceView.RENDERMODE_CONTINUOUSLY) }
@@ -108,6 +110,13 @@ class GamePresenter : MvpPresenter<GamePresenter.GameView>(), LifecycleObserver 
 
                 override fun onCrash() {}
                 override fun onFrame(renderParams: RenderParams, sceneParams: SceneParams) {
+                    gameLooper.trashBlock.subscribe {
+                        if (it == null)
+                            return@subscribe
+
+                        glViewRenderer.removeRenderUnit(it.id)
+                        it.onRemoved()
+                    }
                     gameLooper.objectsDirtyFlat.forEach {
                         val ru = glViewRenderer.getRenderUnit(it.id)
                         if (ru != null) {
@@ -118,11 +127,13 @@ class GamePresenter : MvpPresenter<GamePresenter.GameView>(), LifecycleObserver 
                                     glViewRenderer.removeRenderUnit(ru.id)
                                 it.onRemoved()
                             }
-                            else
+                            else {
                                 ru.map(it, renderParams, sceneParams)
+                            }
                         }
                         else if (it.parent == null)
                             glViewRenderer.add(it.toRenderUnit(renderParams, sceneParams))
+
                         it.onDrawn()
                     }
 
@@ -133,43 +144,6 @@ class GamePresenter : MvpPresenter<GamePresenter.GameView>(), LifecycleObserver 
                     viewState.onSceneConfigured(params)
 
                     sceneParams = params
-
-                    gameLooper.init()
-                    gameLooper.currentBlock.subscribe { viewState.onCurrentBlockChanged(if (it != null) blockTypeRepo[it.typeId] else null) }
-
-                    viewProperty!!.surfaceView.setOnTouchListener { v, me -> gameLooper.onTouch(me, params) }
-
-                    var cw = gameConfig.blockWidthPx * sceneParams.sx
-                    var ch = gameConfig.blockHeightPx * sceneParams.sy
-
-//                    var sm = System.currentTimeMillis()
-//                    var ts = TextStyle("512", 28f, R.font.jura_bold, 0xFFFFFFFF, 0xFFFF0000).withInnerGravity(Gravity.CENTER)
-//                    var texture = renderRepo.textTexture[ts]
-//                    var tm = System.currentTimeMillis() - sm
-//
-//                    Log.d("mymy", "#1 GLText load time: ${tm}ms")
-//
-//                    sm = System.currentTimeMillis()
-//                    ts = TextStyle("128", 20f, R.font.airfool, 0xFFFFFF00, 0xFFFF0000).withInnerGravity(Gravity.CENTER)
-//                    texture = renderRepo.textTexture[ts]
-//                    tm = System.currentTimeMillis() - sm
-//
-//                    Log.d("mymy", "#2 GLText load time: ${tm}ms")
-//
-//                    sm = System.currentTimeMillis()
-//                    ts = TextStyle("1024", 24f, R.font.comfortaa_regular, 0xFFF4FF09, 0xFFFF0000).withInnerGravity(Gravity.CENTER)
-//                    texture = renderRepo.textTexture[ts]
-//                    tm = System.currentTimeMillis() - sm
-//
-//                    Log.d("mymy", "#3 GLText load time: ${tm}ms")
-//
-//                    sm = System.currentTimeMillis()
-//                    ts = TextStyle("128", 20f, R.font.airfool, 0xFFFFFF00, 0xFFFF0000).withInnerGravity(Gravity.CENTER)
-//                    texture = renderRepo.textTexture[ts]
-//                    tm = System.currentTimeMillis() - sm
-//
-//                    Log.d("mymy", "#4 GLText load time: ${tm}ms")
-
                 }
             })
 

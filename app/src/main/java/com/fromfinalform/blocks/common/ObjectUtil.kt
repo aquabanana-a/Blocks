@@ -161,6 +161,15 @@ fun Rect?.mul(value: PointF): Rect? {
         .mulVertical(value.y)
 }
 
+fun <K, V> HashMap<K, V>.getOrCreate(key: K, creator: ((K)->V)): V {
+    var value = this.get(key)
+    if (value == null) {
+        value = creator(key)
+        this[key] = value
+    }
+    return value!!
+}
+
 fun FloatArray.toPoints(): ArrayList<PointF> {
     val ret = ArrayList<PointF>()
     var i = 0

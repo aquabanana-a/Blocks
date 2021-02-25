@@ -44,6 +44,5 @@ class TranslateTo(val destXY: PointF, val speed: Float, startTimeMs: Long = 0L, 
 
     override fun clone(): TranslateTo {
         return TranslateTo(destXY.clone(), speed, startTimeMs, interpolator)
-            .withOnComplete(completeHandler) as TranslateTo
     }
 }

@@ -5,15 +5,19 @@
 
 package com.fromfinalform.blocks.presentation.model.graphics.renderer.unit
 
+import android.graphics.PointF
 import android.graphics.RectF
 import android.opengl.GLES20
 import com.fromfinalform.blocks.common.ICloneable
+import com.fromfinalform.blocks.common.getOrCreate
 import com.fromfinalform.blocks.common.heightInv
+import com.fromfinalform.blocks.presentation.model.graphics.animation.GLAnimationTimeline
 import com.fromfinalform.blocks.presentation.model.graphics.animation.IGLAnimation
+import com.fromfinalform.blocks.presentation.model.graphics.animation.IGLCompletableAnimation
 import com.fromfinalform.blocks.presentation.model.graphics.drawer.ShaderDrawerTypeId
 
 open class RenderItem(
-    val itemParams: ItemParams = ItemParams(
+    override val itemParams: ItemParams = ItemParams(
         RectF(-1f, 1f, -1f, 1f),
         RectF(0f, 0f, 1f, 1f)
     )) : IRenderItem {
@@ -65,9 +69,11 @@ open class RenderItem(
     var blendDstRGB: Int? = null;                   private set
     var blendDstAlpha: Int? = null;                 private set
 
+    var tag: Any? = null; private set
+
     private val lo = Any()
     override var childs: List<IRenderItem>? = null
-    var animations: List<IGLAnimation>? = null;     private set
+    val timelines = hashMapOf<Long, GLAnimationTimeline>()
 
     val usedBlend get() = usedBlendFactor || usedBlendSeparate
     val usedBlendFactor get() = blendSrc > 0 && blendDst > 0
@@ -75,12 +81,14 @@ open class RenderItem(
 
     fun translateX(dX: Float): RenderItem { synchronized(lo) {
         this.x += dX
+        this.itemParams.onChanged()
         this.childs?.mapNotNull { it as? RenderItem }?.forEach { c -> c.translateX(dX) }
         return this
     } }
 
     fun translateY(dY: Float): RenderItem { synchronized(lo) {
         this.y -= dY
+        this.itemParams.onChanged()
         this.childs?.mapNotNull { it as? RenderItem }?.forEach { c -> c.translateY(dY) }
         return this
     } }
@@ -88,6 +96,7 @@ open class RenderItem(
     fun translateXY(dX: Float, dY: Float): RenderItem { synchronized(lo) {
         this.x += dX
         this.y -= dY
+        this.itemParams.onChanged()
         this.childs?.mapNotNull { it as? RenderItem }?.forEach { c -> c.translateXY(dX, dY) }
         return this
     } }
@@ -104,18 +113,21 @@ open class RenderItem(
 
     fun alphaSet(value: Float): RenderItem { synchronized(lo) {
         this.alpha = value
+        this.itemParams.onChanged()
         this.childs?.mapNotNull { it as? RenderItem }?.forEach { it.alphaSet(value) }
         return this
     } }
 
     fun alphaMul(value: Float): RenderItem { synchronized(lo) {
         this.alpha *= value
+        this.itemParams.onChanged()
         this.childs?.mapNotNull { it as? RenderItem }?.forEach { it.alphaMul(value) }
         return this
     } }
 
     fun rotate(dA: Float): RenderItem { synchronized(lo) {
         this.rotation += dA
+        this.itemParams.onChanged()
         return this
     } }
 
@@ -164,27 +176,29 @@ open class RenderItem(
         return null
     } }
 
-    fun addAnimation(value: IGLAnimation) { synchronized(lo) {
-        if (this.animations == null)
-            this.animations = ArrayList()
-
-        (this.animations as ArrayList).add(value)
+    fun addAnimation(value: IGLAnimation, timelineId: Long = 0): GLAnimationTimeline? { synchronized(lo) {
+        if (value is IGLCompletableAnimation) {
+            var timeline = timelines.getOrCreate(timelineId, { GLAnimationTimeline(timelineId) })
+            timeline.enqueue(value)
+            return timeline
+        }
+        return null
     } }
 
-    fun removeAnimation(value: IGLAnimation) { synchronized(lo) {
-        (this.animations as? ArrayList)?.remove(value)
-    } }
+//    fun removeAnimation(value: IGLAnimation) { synchronized(lo) {
+//        (this.animations as? MutableList)?.remove(value)
+//    } }
 
     fun withId(id: Long): RenderItem {
         this.id = id
         return this
     }
 
-    fun setLayout(x: Float, y: Float, w: Float, h: Float, r: Float, a: Float) { synchronized(lo) {
-        this.x = x
-        this.y = y
-        this.width = w
-        this.height = h
+    fun setLayout(location: PointF, size: PointF, r: Float, a: Float) { synchronized(lo) {
+        this.x = location.x
+        this.y = location.y
+        this.width = size.x
+        this.height = size.y
         this.rotation = r
         this.alpha = a
     } }
@@ -197,12 +211,14 @@ open class RenderItem(
 
     fun withRotation(angle: Float): RenderItem {
         this.rotation = angle
+        this.itemParams.onChanged()
         return this
     }
 
     fun withSize(w: Float, h: Float): RenderItem {
         this.width = w
         this.height = h
+        this.itemParams.onChanged()
         return this
     }
 
@@ -211,6 +227,7 @@ open class RenderItem(
         this.itemParams.srcRect.top = src.top
         this.itemParams.srcRect.right = src.right
         this.itemParams.srcRect.bottom = src.bottom
+        this.itemParams.onChanged()
         return this
     }
 
@@ -250,18 +267,24 @@ open class RenderItem(
         return this
     } }
 
-    fun withAnimations(values: List<IGLAnimation>?): RenderItem { synchronized(lo) {
-        this.animations = if (values == null) null else ArrayList(values.map { c -> c.clone() })
+//    fun withAnimations(values: List<IGLAnimation>?): RenderItem { synchronized(lo) {
+//        this.animations = if (values == null) null else ArrayList(values.map { c -> c.clone() })
+//        return this
+//    } }
+
+    fun withTag(value: Any? = null): RenderItem {
+        this.tag = value
         return this
-    } }
+    }
 
     override fun clone(): RenderItem { synchronized(lo) {
-        return RenderItem(itemParams.copy())
+        return RenderItem(itemParams.clone())
             .withTexture(textureId)
             .withColor(color, colorSecondary, colorAngle)
             .withShader(shaderTypeId)
             .withBlendFactor(blendSrc, blendDst)
             .withBlendSeparate(blendSrcRGB, blendDstRGB, blendSrcAlpha, blendDstAlpha)
+            .withTag(tag)
             .withChilds(childs).also {
                 it.parent = parent
             }

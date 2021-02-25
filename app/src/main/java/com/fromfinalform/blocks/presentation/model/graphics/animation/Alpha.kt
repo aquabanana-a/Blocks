@@ -45,6 +45,5 @@ class Alpha(var alphaEnd: Float, var alphaStart: Float = START_VALUE_CURRENT, ov
     override fun clone(): Alpha {
         return Alpha(alphaStart, alphaEnd, durationMs, startTimeMs, interpolator)
             .withAffectChilds(affectChilds)
-            .withOnComplete(completeHandler) as Alpha
     }
 }

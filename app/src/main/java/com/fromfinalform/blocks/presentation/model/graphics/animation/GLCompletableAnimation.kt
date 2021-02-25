@@ -6,9 +6,12 @@
 package com.fromfinalform.blocks.presentation.model.graphics.animation
 
 import android.view.animation.Interpolator
+import com.fromfinalform.blocks.presentation.model.graphics.animation.event.GLAnimationCompleteArgs
+import com.fromfinalform.blocks.presentation.model.graphics.animation.event.GLAnimationCompleteEvent
 import com.fromfinalform.blocks.presentation.model.graphics.renderer.RenderParams
 import com.fromfinalform.blocks.presentation.model.graphics.renderer.SceneParams
 import com.fromfinalform.blocks.presentation.model.graphics.renderer.unit.RenderItem
+import io.reactivex.rxjava3.subjects.AsyncSubject
 import java.lang.IllegalStateException
 
 abstract class GLCompletableAnimation<T>(
@@ -21,10 +24,16 @@ abstract class GLCompletableAnimation<T>(
     open var endTimeMs: Long = startTimeMs; protected set
     open var durationMs: Long = 0L; protected set
 
-    final override var completeHandler: ((renderItem: RenderItem, renderParams: RenderParams, sceneParams: SceneParams) -> Unit)?= null
-    fun withOnComplete(value: ((renderItem: RenderItem, renderParams: RenderParams, sceneParams: SceneParams) -> Unit)?): IGLCompletableAnimation {
-        this.completeHandler = value
+    override val completeEvent = AsyncSubject.create<GLAnimationCompleteEvent>()
+
+    override fun withOnComplete(value: ((GLAnimationCompleteEvent) -> Unit)?): IGLCompletableAnimation {
+        completeEvent.subscribe { value?.invoke(it) }
         return this
+    }
+
+    override fun onComplete(args: GLAnimationCompleteArgs) {
+        completeEvent.onNext(GLAnimationCompleteEvent(this, args))
+        completeEvent.onComplete()
     }
 
     final override fun initialize(item: RenderItem, renderParams: RenderParams, sceneParams: SceneParams) {

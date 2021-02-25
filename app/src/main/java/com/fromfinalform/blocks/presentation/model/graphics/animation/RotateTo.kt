@@ -36,6 +36,5 @@ open class RotateTo(var destAngle: Float, val speed: Float, startTimeMs: Long = 
 
     override fun clone(): RotateTo {
         return RotateTo(destAngle, speed, startTimeMs, interpolator)
-            .withOnComplete(completeHandler) as RotateTo
     }
 }

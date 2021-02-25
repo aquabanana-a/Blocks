@@ -7,14 +7,12 @@ package com.fromfinalform.blocks.domain.interactor
 
 import android.view.Gravity
 import com.fromfinalform.blocks.R
-import com.fromfinalform.blocks.data.repository.ClassicBlockTypeRepository
 import com.fromfinalform.blocks.domain.model.game.`object`.block.Block
 import com.fromfinalform.blocks.domain.model.game.`object`.block.BlockTypeId
 import com.fromfinalform.blocks.domain.model.game.`object`.GameObject
 import com.fromfinalform.blocks.domain.model.game.configuration.IGameConfig
 import com.fromfinalform.blocks.domain.repository.IBlockTypeRepository
 import com.fromfinalform.blocks.presentation.model.graphics.text.TextStyle
-import javax.inject.Inject
 
 class BlockBuilder(val config: IGameConfig, val typeRepo: IBlockTypeRepository) {
 
@@ -39,12 +37,20 @@ class BlockBuilder(val config: IGameConfig, val typeRepo: IBlockTypeRepository) 
         ret.height = config.blockHeightPx
         ret.color = type.bgColor
 
-        ret.add(GameObject().apply {
+        ret.requestAnimation(GameObject().apply {
             x = 0f//ret.width / 2
             y = ret.height / 2
             width = ret.width///2
             height = ret.height/2
-            textStyle = TextStyle(typeId.toString(), 28f, R.font.jura_bold, type.txtColor, 0xFFFF0000).withInnerGravity(Gravity.CENTER)
+            textStyle = TextStyle(typeId.toString(), 28f, R.font.jura_bold, type.txtColor, type.txtBgColor).withInnerGravity(Gravity.CENTER)
+        })
+
+        ret.requestAnimation(GameObject().apply {
+            x = 0f
+            y = ret.height / 2
+            width = ret.width
+            height = 1f
+            color = type.separatorColor
         })
 
         return ret

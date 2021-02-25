@@ -10,9 +10,13 @@ import com.fromfinalform.blocks.domain.interactor.BlockBuilder
 import com.fromfinalform.blocks.domain.model.game.IGameField
 import com.fromfinalform.blocks.domain.model.game.IGameLooper
 import com.fromfinalform.blocks.domain.model.game.`object`.GameObject
+import com.fromfinalform.blocks.domain.model.game.`object`.animation.GameObjectAnimation
+import com.fromfinalform.blocks.domain.model.game.`object`.animation.GameObjectAnimationTypeId
 import com.fromfinalform.blocks.domain.model.game.`object`.block.Block
 import com.fromfinalform.blocks.domain.model.game.configuration.IGameConfig
 import com.fromfinalform.blocks.domain.repository.IBlockTypeRepository
+import com.fromfinalform.blocks.presentation.model.graphics.interpolator.EaseInEaseOutInterpolator
+import com.fromfinalform.blocks.presentation.model.graphics.interpolator.EaseOutInterpolator
 import com.fromfinalform.blocks.presentation.model.graphics.renderer.RenderParams
 import com.fromfinalform.blocks.presentation.model.graphics.renderer.SceneParams
 import io.reactivex.rxjava3.subjects.BehaviorSubject
@@ -26,41 +30,58 @@ class ClassicGameLooper : IGameLooper {
     @Inject lateinit var blockTypeRepo: IBlockTypeRepository
 
     private val objectsLo = Any()
-
     override val objects: List<GameObject> get() { synchronized(objectsLo) {
         val cb = currentBlock.value
-        return if (cb != null) this.field.objects + cb else this.field.objects.toList()
+        val ret = this.field.objects.toMutableList()
+        if (cb != null && !cb.isWaitForRemove && !cb.isRemoved)
+            ret += cb
+        return ret
     } }
     override val objectsDirtyFlat: List<GameObject> get() = getDirtyFlatList(objects)
 
+    override lateinit var trashBlock: BehaviorSubject<Block?>; private set
     override lateinit var currentBlock: BehaviorSubject<Block?>; private set
-
-    private var objectsCountChanged: ((List<GameObject>?, List<GameObject>?)->Unit)? = null
-    override fun withObjectsCountChangedListener(handler: ((List<GameObject>?, List<GameObject>?)->Unit)?): ClassicGameLooper {
-        this.objectsCountChanged = handler
-        return this
-    }
+    private var currentBlockProto: Block? = null
 
     private fun genNextBlock() { synchronized(objectsLo) {
-        currentBlock.onNext(BlockBuilder(config, blockTypeRepo)
+        currentBlockProto = BlockBuilder(config, blockTypeRepo)
             .withRandomTypeId(currentBlock.value?.typeId)
             .build()
-            .withLocation((config.fieldWidthPx - config.blockWidthPx)/2f, config.fieldHeightPx + config.blockCurrGapTopPx + config.blockGapVPx + config.blockGapVPx) as Block)
+        currentBlock.onNext(currentBlockProto!!.clone()
+            .withLocation((config.fieldWidthPx - config.blockWidthPx)/2f, config.fieldHeightPx + config.blockCurrGapTopPx + config.blockGapVPx + config.blockGapVPx)
+            .requestAnimation(GameObjectAnimation(GameObjectAnimationTypeId.SCALE)
+                .withParam(GameObjectAnimation.PARAM_TIMELINE_ID, 0)
+                .withParam(GameObjectAnimation.PARAM_SCALE_FROM, 0.001f)
+                .withParam(GameObjectAnimation.PARAM_SCALE_TO, 1.0f)
+                .withParam(GameObjectAnimation.PARAM_DURATION, 800L)
+                .withParam(GameObjectAnimation.PARAM_INTERPOLATOR, EaseInEaseOutInterpolator())
+                .withParam(GameObjectAnimation.PARAM_AFFECT_CHILDS))
+            .requestAnimation(GameObjectAnimation(GameObjectAnimationTypeId.ROTATE)
+                .withParam(GameObjectAnimation.PARAM_TIMELINE_ID, 1)
+                .withParam(GameObjectAnimation.PARAM_DEST_ANGLE, 360f * 4)
+                .withParam(GameObjectAnimation.PARAM_SPEED, 2.0f)
+                .withParam(GameObjectAnimation.PARAM_INTERPOLATOR, EaseOutInterpolator()))
+            as Block)
     } }
 
     override fun init() {
         field.init()
         currentBlock = BehaviorSubject.create()
+        trashBlock = BehaviorSubject.create()
 
         genNextBlock()
 
-        field.withColumnTouchdownListener { index, location ->
+        field.withColumnTouchdownListener { index, location -> synchronized(objectsLo) {
+            var nb = currentBlock.value
+            if (nb == null || nb.isWaitForRemove || nb.isRemoved)
+                return@synchronized false
 
-            field.placeTo(currentBlock.value!!.clone(), index)
+            field.placeTo(currentBlockProto!!, index)
+            trashBlock.onNext(nb.requestRemove() as Block)
             genNextBlock()
 
-            true
-        }
+            return@synchronized true
+        } }
     }
 
     override fun start() {

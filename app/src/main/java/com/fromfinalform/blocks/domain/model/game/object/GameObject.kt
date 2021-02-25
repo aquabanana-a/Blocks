@@ -5,24 +5,35 @@
 
 package com.fromfinalform.blocks.domain.model.game.`object`
 
+import android.graphics.PointF
 import com.fromfinalform.blocks.common.ICloneable
-import com.fromfinalform.blocks.domain.model.game.`object`.GameObject.Companion.clearRemoved
 import com.fromfinalform.blocks.domain.model.game.`object`.animation.GameObjectAnimation
+import com.fromfinalform.blocks.presentation.model.graphics.animation.GLAnimationTimeline
+import com.fromfinalform.blocks.presentation.model.graphics.animation.event.GLTimelineQueueCompleteEvent
 import com.fromfinalform.blocks.presentation.model.graphics.text.TextStyle
+import java.util.concurrent.atomic.AtomicBoolean
 
 open class GameObject(val id: Long = GameObjectIndexer.getNext()) : ICloneable<GameObject> {
 
     companion object {
-        fun MutableList<GameObject>.clearRemoved() {
-            this.removeAll { it.isRemoved }
-            this.forEach { (it.childs as? MutableList)?.clearRemoved() }
+        fun List<GameObject?>?.removeTrash() { tryRemoveTrashFromList(this) }
+
+        fun tryRemoveTrashFromList(src: List<GameObject?>?) {
+            if ((src as? MutableList) != null) {
+                src.removeAll { it?.isRemoved == true }
+                src.forEach { if (it?.childs != null) tryRemoveTrashFromList(it.childs as? MutableList) }
+            }
         }
     }
 
     var x: Float = 0f
     var y: Float = 0f
+    val location: PointF get() = PointF(x, y)
+
     var width: Float = 0f
     var height: Float = 0f
+    val size: PointF get() = PointF(width, height)
+
     var rotation: Float = 0f
     var alpha: Float = 1f
 
@@ -35,12 +46,40 @@ open class GameObject(val id: Long = GameObjectIndexer.getNext()) : ICloneable<G
     var childs: List<GameObject>? = null
     var animations: List<GameObjectAnimation>? = null
 
+    var drawedHandler: ((GameObject)->Unit)? = null
+    var removedHandler: ((GameObject)->Unit)? = null
+    var animationQueueCompleteHandler: ((GameObject, GLTimelineQueueCompleteEvent) -> Boolean)? = null
+
+    var isWaitForAnimate = false; private set
     var isWaitForRemove = false; private set
     var isRemoved = false; private set
     var isDirty = true; private set
 
+    private var canMergeImpl = AtomicBoolean(false)
+    val canMerge get() = canMergeImpl.get()
+
     private val lo = Any()
-    
+
+    fun enableMerge(): GameObject {
+        this.canMergeImpl.set(true)
+        return this
+    }
+
+    fun disableMerge(): GameObject {
+        this.canMergeImpl.set(false)
+        return this
+    }
+
+    fun withOnAnimationQueueComplete(handler: ((GameObject, GLTimelineQueueCompleteEvent) -> Boolean)? = null): GameObject {
+        this.animationQueueCompleteHandler = handler
+        return this
+    }
+
+    fun withOnDrawed(handler: ((GameObject) -> Unit)? = null): GameObject {
+        this.drawedHandler = handler
+        return this
+    }
+
     fun requestDraw(): GameObject { synchronized(lo) { // todo: sync? return to AtomicBoolean?
         this.isDirty = true
         return this
@@ -48,7 +87,13 @@ open class GameObject(val id: Long = GameObjectIndexer.getNext()) : ICloneable<G
     
     fun onDrawn() { synchronized(lo) {
         this.isDirty = false
+        this.drawedHandler?.invoke(this)
     } }
+
+    fun withOnRemoved(handler: ((GameObject) -> Unit)? = null): GameObject {
+        this.removedHandler = handler
+        return this
+    }
 
     fun requestRemove(): GameObject { synchronized(lo) {
         this.isWaitForRemove = true
@@ -59,6 +104,7 @@ open class GameObject(val id: Long = GameObjectIndexer.getNext()) : ICloneable<G
     fun onRemoved() { synchronized(lo) {
         this.isWaitForRemove = false
         this.isRemoved = true
+        this.removedHandler?.invoke(this)
     } }
 
     fun translate(dX: Float, dY: Float): GameObject {
@@ -85,7 +131,7 @@ open class GameObject(val id: Long = GameObjectIndexer.getNext()) : ICloneable<G
         return this
     }
 
-    fun add(value: GameObject): GameObject { synchronized(lo) {
+    fun requestAnimation(value: GameObject): GameObject { synchronized(lo) {
         if (this.childs == null)
             this.childs = arrayListOf()
         value.parent = this
@@ -93,16 +139,30 @@ open class GameObject(val id: Long = GameObjectIndexer.getNext()) : ICloneable<G
         return this
     } }
 
-    fun add(value: GameObjectAnimation): GameObject { synchronized(lo) {
+    fun requestAnimation(value: GameObjectAnimation): GameObject { synchronized(lo) {
         if (this.animations == null)
             this.animations = arrayListOf()
         (this.animations as MutableList).add(value)
+        this.isWaitForAnimate = true
+        requestDraw()
+        return this
+    } }
+
+    fun onAnimationConsumed(value: GameObjectAnimation): GameObject { synchronized(lo) {
+        if (this.animations?.isNotEmpty() == false) {
+            this.isWaitForAnimate = false
+            return this
+        }
+
+        (this.animations as MutableList).remove(value)
+        if (this.animations?.isEmpty() == true)
+            this.isWaitForAnimate = false
+
         return this
     } }
 
     fun clearRemovedChilds() { synchronized(lo) {
-        if (childs != null)
-            (this.childs as MutableList).clearRemoved()
+        childs.removeTrash()
     } }
 
     override fun clone(): GameObject { synchronized(lo) {
@@ -117,7 +177,7 @@ open class GameObject(val id: Long = GameObjectIndexer.getNext()) : ICloneable<G
         ret.parent = parent
 
         if (childs != null) ret.childs = childs!!.map { it.clone() }
-        if (animations != null) ret.animations = animations!!.map { it.clone() }
+        //if (animations != null) ret.animations = animations!!.map { it.clone() }
 
         return ret
     } }

@@ -17,6 +17,7 @@ interface IGameLooper : IGameObjectsHolder {
     val objectsDirtyFlat: List<GameObject>
 
     val currentBlock: BehaviorSubject<Block?>
+    val trashBlock: BehaviorSubject<Block?>
 
     fun onTouch(me: MotionEvent, sp: SceneParams): Boolean
 
@@ -26,5 +27,4 @@ interface IGameLooper : IGameObjectsHolder {
 
     fun onFrameDrawn(renderParams: RenderParams, sceneParams: SceneParams)
 
-    fun withObjectsCountChangedListener(handler: ((added: List<GameObject>?, removed: List<GameObject>?) -> Unit)?): IGameLooper
 }

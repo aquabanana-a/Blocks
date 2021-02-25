@@ -12,6 +12,7 @@ import com.fromfinalform.blocks.presentation.model.graphics.renderer.RenderParam
 import com.fromfinalform.blocks.presentation.model.graphics.renderer.SceneParams
 import com.fromfinalform.blocks.presentation.model.graphics.renderer.unit.RenderItem
 import kotlin.math.floor
+import kotlin.math.max
 
 open class ScaleXY(
     val xScaleStart: Float,
@@ -57,14 +58,27 @@ open class ScaleXY(
         var value = ((renderParams.timeMs - startTimeMs) / durationMs.toFloat()).coerceIn(0f, 1f)
         var valueInterpolated = interpolator.getInterpolation(value)
 
-        val dst = item.itemParams.dstRect
-        val clip = item.itemParams.clipRect
+
 
         val scalex = xScaleEnd * valueInterpolated + xScaleStart * (1f - valueInterpolated)
         val scaley = yScaleEnd * valueInterpolated + yScaleStart * (1f - valueInterpolated)
 
         val scalexCurr = scalex / scalexTransformed
         val scaleyCurr = scaley / scaleyTransformed
+
+        transformItem(item, scalexCurr, scaleyCurr)
+        if (affectChilds)
+            item.childs?.mapNotNull { it as? RenderItem }?.forEach { transformItem(it, scalexCurr, scaleyCurr) }
+
+        scalexTransformed = scalex
+        scaleyTransformed = scaley
+
+        return value >= 1.0f
+    }
+
+    private fun transformItem(item: RenderItem, scalexCurr: Float, scaleyCurr: Float) {
+        val dst = item.itemParams.dstRect
+        val clip = item.itemParams.clipRect
 
         var width = dst.width() * scalexCurr
         var height = dst.heightInv() * scaleyCurr
@@ -192,21 +206,14 @@ open class ScaleXY(
                     dst.top = top - heightDstScaled * heightDstOutsideClipTopPerc
                     dst.bottom = bottom - heightDstScaled * heightDstOutsideClipBottomPerc
                 }
+
+                item.itemParams.onChanged()
             }
-
-        if (affectChilds)
-            item.childs?.mapNotNull { it as? RenderItem }?.forEach { transformImpl(it, renderParams, sceneParams) }
-
-        scalexTransformed = scalex
-        scaleyTransformed = scaley
-
-        return value >= 1.0f
     }
 
     override fun clone(): ScaleXY {
         return ScaleXY(xScaleStart, xScaleEnd, yScaleStart, yScaleEnd, durationMs, startTimeMs, interpolator)
             .withPivot(pivot)
             .withAffectChilds(affectChilds)
-            .withOnComplete(completeHandler) as ScaleXY
     }
 }

@@ -7,6 +7,7 @@ package com.fromfinalform.blocks.presentation.model.graphics.renderer.unit
 
 import android.opengl.GLES20
 import com.fromfinalform.blocks.presentation.model.graphics.animation.IGLCompletableAnimation
+import com.fromfinalform.blocks.presentation.model.graphics.animation.event.GLAnimationCompleteArgs
 import com.fromfinalform.blocks.presentation.model.graphics.drawer.ShaderDrawerTypeId
 import com.fromfinalform.blocks.presentation.model.graphics.renderer.IRenderer
 import com.fromfinalform.blocks.presentation.model.graphics.renderer.RenderParams
@@ -30,22 +31,25 @@ class RenderUnit : RenderItem(), IRenderUnit {
     private fun renderImpl(item: RenderItem, renderer: IRenderer, renderParams: RenderParams, sceneParams: SceneParams, parent: RenderItem? = null) {
         val drawer = renderParams.repos.shader[item.shaderTypeId]
 
-        val animationsToRemove = arrayListOf<IGLCompletableAnimation>()
-        item.animations?.toList()?.forEach {
-            if (!it.isInitialized) it.initialize(item, renderParams, sceneParams)
-            it.transform(item, renderParams, sceneParams)
+        val animationsCompleted = arrayListOf<IGLCompletableAnimation>()
+        item.timelines.values.forEach {
+            val a = it.currentAnimation
+            if (a != null) {
+                if (!a.isInitialized) a.initialize(item, renderParams, sceneParams)
+                a.transform(item, renderParams, sceneParams)
 
-            if (it is IGLCompletableAnimation && it.isComplete)
-                animationsToRemove.add(it)
-        }
-
-        if (animationsToRemove.size > 0) {
-            animationsToRemove.forEach {
-                item.removeAnimation(it)
-                it.completeHandler?.invoke(item, renderParams, sceneParams)
+                if (a is IGLCompletableAnimation && a.isComplete)
+                    animationsCompleted.add(a)
             }
-            //renderer.scope.launch { animationsToRemove.forEach { it.completeHandler?.invoke(item, renderParams, sceneParams) } }
         }
+
+//        item.animations?.toList()?.forEach {
+//            if (!it.isInitialized) it.initialize(item, renderParams, sceneParams)
+//            it.transform(item, renderParams, sceneParams)
+//
+//            if (it is IGLCompletableAnimation && it.isComplete)
+//                animationsToRemove.add(it)
+//        }
 
         when (item.shaderTypeId) {
             ShaderDrawerTypeId.SOLID    -> drawer!!.setUniforms(GLColor(item.color))
@@ -68,6 +72,17 @@ class RenderUnit : RenderItem(), IRenderUnit {
         item.childs?.mapNotNull { it as? RenderItem }?.forEach {
             renderImpl(it, renderer, renderParams, sceneParams, item)
         }
+
+        animationsCompleted.forEach {
+            it.onComplete(GLAnimationCompleteArgs(item, renderParams, sceneParams))
+        }
+//        if (animationsCompleted.size > 0) {
+//            animationsCompleted.forEach {
+//                item.removeAnimation(it)
+//                it.onComplete(GLAnimationCompleteArgs(item, renderParams, sceneParams))
+//            }
+////            renderer.scope.launch { animationsToRemove.forEach { it.completeHandler?.invoke(item, renderParams, sceneParams) } }
+//        }
     }
 
     override fun prerender(renderer: IRenderer) {
