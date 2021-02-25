@@ -79,27 +79,27 @@ open class RenderItem(
     val usedBlendFactor get() = blendSrc > 0 && blendDst > 0
     val usedBlendSeparate get() = blendSrcRGB != null && blendSrcAlpha != null && blendDstRGB != null && blendDstAlpha != null
 
-    fun translateX(dX: Float): RenderItem { synchronized(lo) {
+    fun translateX(dX: Float): RenderItem { /*synchronized(lo) {*/
         this.x += dX
         this.itemParams.onChanged()
         this.childs?.mapNotNull { it as? RenderItem }?.forEach { c -> c.translateX(dX) }
         return this
-    } }
+    } /*}*/
 
-    fun translateY(dY: Float): RenderItem { synchronized(lo) {
+    fun translateY(dY: Float): RenderItem { /*synchronized(lo) {*/
         this.y -= dY
         this.itemParams.onChanged()
         this.childs?.mapNotNull { it as? RenderItem }?.forEach { c -> c.translateY(dY) }
         return this
-    } }
+    } /*}*/
 
-    fun translateXY(dX: Float, dY: Float): RenderItem { synchronized(lo) {
+    fun translateXY(dX: Float, dY: Float): RenderItem { /*synchronized(lo) {*/
         this.x += dX
         this.y -= dY
         this.itemParams.onChanged()
         this.childs?.mapNotNull { it as? RenderItem }?.forEach { c -> c.translateXY(dX, dY) }
         return this
-    } }
+    } /*}*/
 
     fun translateXWidth(times: Int): RenderItem {
         this.translateX(times * width)
@@ -111,43 +111,43 @@ open class RenderItem(
         return this
     }
 
-    fun alphaSet(value: Float): RenderItem { synchronized(lo) {
+    fun alphaSet(value: Float): RenderItem { /*synchronized(lo) {*/
         this.alpha = value
         this.itemParams.onChanged()
         this.childs?.mapNotNull { it as? RenderItem }?.forEach { it.alphaSet(value) }
         return this
-    } }
+    } /*}*/
 
-    fun alphaMul(value: Float): RenderItem { synchronized(lo) {
+    fun alphaMul(value: Float): RenderItem { /*synchronized(lo) {*/
         this.alpha *= value
         this.itemParams.onChanged()
         this.childs?.mapNotNull { it as? RenderItem }?.forEach { it.alphaMul(value) }
         return this
-    } }
+    } /*}*/
 
-    fun rotate(dA: Float): RenderItem { synchronized(lo) {
+    fun rotate(dA: Float): RenderItem { /*synchronized(lo) {*/
         this.rotation += dA
         this.itemParams.onChanged()
         return this
-    } }
+    } /*}*/
 
-    fun scaleX(factor: Float): RenderItem { synchronized(lo) {
+    fun scaleX(factor: Float): RenderItem { /*synchronized(lo) {*/
         val dw = width*(factor - 1)
         this.x -= dw / 2f
         this.width += dw
         this.childs?.mapNotNull { it as? RenderItem }?.forEach { c -> c.scaleX(factor) }
         return this
-    } }
+    } /*}*/
 
-    fun scaleY(factor: Float): RenderItem { synchronized(lo) {
+    fun scaleY(factor: Float): RenderItem { /*synchronized(lo) {*/
         val dh = height * (factor - 1)
         this.y += dh / 2f
         this.height += dh
         this.childs?.mapNotNull { it as? RenderItem }?.forEach { c -> c.scaleY(factor) }
         return this
-    } }
+    } /*}*/
 
-    fun scaleXY(factor: Float): RenderItem { synchronized(lo) {
+    fun scaleXY(factor: Float): RenderItem { /*synchronized(lo) {*/
         val dw = width * (factor - 1)
         val dh = height * (factor - 1)
         this.x -= dw / 2f
@@ -156,17 +156,17 @@ open class RenderItem(
         this.height += dh
         this.childs?.mapNotNull { it as? RenderItem }?.forEach { c -> c.scaleXY(factor) }
         return this
-    } }
+    } /*}*/
 
-    override fun addChild(value: IRenderItem) { synchronized(lo) {
+    override fun addChild(value: IRenderItem) { /*synchronized(lo) {*/
         if(this.childs == null)
             this.childs = ArrayList()
 
         value.parent = this
         (this.childs as ArrayList).add(value)
-    } }
+    } /*}*/
 
-    override fun removeChild(id: Long): IRenderItem? { synchronized(lo) {
+    override fun removeChild(id: Long): IRenderItem? { /*synchronized(lo) {*/
         var item = (this.childs as? ArrayList)?.first { it.id == id }
         val removed = (this.childs as? ArrayList)?.remove(item)
         if (removed == true) {
@@ -174,16 +174,16 @@ open class RenderItem(
             return item
         }
         return null
-    } }
+    } /*}*/
 
-    fun addAnimation(value: IGLAnimation, timelineId: Long = 0): GLAnimationTimeline? { synchronized(lo) {
+    fun addAnimation(value: IGLAnimation, timelineId: Long = 0): GLAnimationTimeline? { /*synchronized(lo) {*/
         if (value is IGLCompletableAnimation) {
             var timeline = timelines.getOrCreate(timelineId, { GLAnimationTimeline(timelineId) })
             timeline.enqueue(value)
             return timeline
         }
         return null
-    } }
+    } /*}*/
 
 //    fun removeAnimation(value: IGLAnimation) { synchronized(lo) {
 //        (this.animations as? MutableList)?.remove(value)
@@ -194,14 +194,14 @@ open class RenderItem(
         return this
     }
 
-    fun setLayout(location: PointF, size: PointF, r: Float, a: Float) { synchronized(lo) {
+    fun setLayout(location: PointF, size: PointF, r: Float, a: Float) { /*synchronized(lo) {*/
         this.x = location.x
         this.y = location.y
         this.width = size.x
         this.height = size.y
         this.rotation = r
         this.alpha = a
-    } }
+    } /*}*/
 
     fun withLocation(x: Float, y: Float): RenderItem {
         this.translateX(x - this.x)
@@ -262,10 +262,10 @@ open class RenderItem(
         return this
     }
 
-    fun withChilds(values: List<IRenderItem>?): RenderItem { synchronized(lo) {
+    fun withChilds(values: List<IRenderItem>?): RenderItem { /*synchronized(lo) {*/
         this.childs = values?.map { c -> c.clone() }
         return this
-    } }
+    } /*}*/
 
 //    fun withAnimations(values: List<IGLAnimation>?): RenderItem { synchronized(lo) {
 //        this.animations = if (values == null) null else ArrayList(values.map { c -> c.clone() })
@@ -277,7 +277,7 @@ open class RenderItem(
         return this
     }
 
-    override fun clone(): RenderItem { synchronized(lo) {
+    override fun clone(): RenderItem { /*synchronized(lo) {*/
         return RenderItem(itemParams.clone())
             .withTexture(textureId)
             .withColor(color, colorSecondary, colorAngle)
@@ -288,5 +288,5 @@ open class RenderItem(
             .withChilds(childs).also {
                 it.parent = parent
             }
-    } }
+    } /*}*/
 }

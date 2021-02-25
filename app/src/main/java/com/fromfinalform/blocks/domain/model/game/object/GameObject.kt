@@ -57,16 +57,19 @@ open class GameObject(val id: Long = GameObjectIndexer.getNext()) : ICloneable<G
 
     private var canMergeImpl = AtomicBoolean(false)
     val canMerge get() = canMergeImpl.get()
+//    var canMerge = false
 
     private val lo = Any()
 
     fun enableMerge(): GameObject {
         this.canMergeImpl.set(true)
+//        this.canMerge = true
         return this
     }
 
     fun disableMerge(): GameObject {
         this.canMergeImpl.set(false)
+//        this.canMerge = false
         return this
     }
 
@@ -80,32 +83,32 @@ open class GameObject(val id: Long = GameObjectIndexer.getNext()) : ICloneable<G
         return this
     }
 
-    fun requestDraw(): GameObject { synchronized(lo) { // todo: sync? return to AtomicBoolean?
+    fun requestDraw(): GameObject { /*synchronized(lo) {*/ // todo: sync? return to AtomicBoolean?
         this.isDirty = true
         return this
-    } }
+    } /*}*/
     
-    fun onDrawn() { synchronized(lo) {
+    fun onDrawn() { /*synchronized(lo) {*/
         this.isDirty = false
         this.drawedHandler?.invoke(this)
-    } }
+    } /*}*/
 
     fun withOnRemoved(handler: ((GameObject) -> Unit)? = null): GameObject {
         this.removedHandler = handler
         return this
     }
 
-    fun requestRemove(): GameObject { synchronized(lo) {
+    fun requestRemove(): GameObject { /*synchronized(lo) {*/
         this.isWaitForRemove = true
         this.isDirty = true
         return this
-    } }
+    } /*}*/
 
-    fun onRemoved() { synchronized(lo) {
+    fun onRemoved() { /*synchronized(lo) {*/
         this.isWaitForRemove = false
         this.isRemoved = true
         this.removedHandler?.invoke(this)
-    } }
+    } /*}*/
 
     fun translate(dX: Float, dY: Float): GameObject {
         this.translateX(dX)
@@ -113,17 +116,17 @@ open class GameObject(val id: Long = GameObjectIndexer.getNext()) : ICloneable<G
         return this
     }
 
-    fun translateX(dX: Float): GameObject { synchronized(lo) {
+    fun translateX(dX: Float): GameObject { /*synchronized(lo) {*/
         this.x += dX
         this.childs?.forEach { c -> c.translateX(dX) }
         return this
-    } }
+    } /*}*/
 
-    fun translateY(dY: Float): GameObject { synchronized(lo) {
+    fun translateY(dY: Float): GameObject { /*synchronized(lo) {*/
         this.y += dY
         this.childs?.forEach { c -> c.translateY(dY) }
         return this
-    } }
+    } /*}*/
 
     fun withLocation(x: Float, y: Float): GameObject {
         this.translateX(x - this.x)
@@ -131,24 +134,24 @@ open class GameObject(val id: Long = GameObjectIndexer.getNext()) : ICloneable<G
         return this
     }
 
-    fun requestAnimation(value: GameObject): GameObject { synchronized(lo) {
+    fun requestAnimation(value: GameObject): GameObject { /*synchronized(lo) {*/
         if (this.childs == null)
             this.childs = arrayListOf()
         value.parent = this
         (this.childs as MutableList).add(value)
         return this
-    } }
+    } /*}*/
 
-    fun requestAnimation(value: GameObjectAnimation): GameObject { synchronized(lo) {
+    fun requestAnimation(value: GameObjectAnimation): GameObject { /*synchronized(lo) {*/
         if (this.animations == null)
             this.animations = arrayListOf()
         (this.animations as MutableList).add(value)
         this.isWaitForAnimate = true
         requestDraw()
         return this
-    } }
+    } /*}*/
 
-    fun onAnimationConsumed(value: GameObjectAnimation): GameObject { synchronized(lo) {
+    fun onAnimationConsumed(value: GameObjectAnimation): GameObject { /*synchronized(lo) {*/
         if (this.animations?.isNotEmpty() == false) {
             this.isWaitForAnimate = false
             return this
@@ -159,13 +162,13 @@ open class GameObject(val id: Long = GameObjectIndexer.getNext()) : ICloneable<G
             this.isWaitForAnimate = false
 
         return this
-    } }
+    } /*}*/
 
-    fun clearRemovedChilds() { synchronized(lo) {
+    fun clearRemovedChilds() { /*synchronized(lo) {*/
         childs.removeTrash()
-    } }
+    } /*}*/
 
-    override fun clone(): GameObject { synchronized(lo) {
+    override fun clone(): GameObject { /*synchronized(lo) {*/
         val ret = GameObject()
         ret.x = x
         ret.y = y
@@ -180,5 +183,5 @@ open class GameObject(val id: Long = GameObjectIndexer.getNext()) : ICloneable<G
         //if (animations != null) ret.animations = animations!!.map { it.clone() }
 
         return ret
-    } }
+    } /*}*/
 }

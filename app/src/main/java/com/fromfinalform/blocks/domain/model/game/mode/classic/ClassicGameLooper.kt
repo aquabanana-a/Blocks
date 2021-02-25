@@ -29,21 +29,21 @@ class ClassicGameLooper : IGameLooper {
     @Inject lateinit var field: IGameField
     @Inject lateinit var blockTypeRepo: IBlockTypeRepository
 
-    private val objectsLo = Any()
-    override val objects: List<GameObject> get() { synchronized(objectsLo) {
+//    private val objectsLo = Any()
+    override val objects: List<GameObject> get() { /*synchronized(objectsLo) {*/
         val cb = currentBlock.value
         val ret = this.field.objects.toMutableList()
         if (cb != null && !cb.isWaitForRemove && !cb.isRemoved)
             ret += cb
         return ret
-    } }
+    } /*}*/
     override val objectsDirtyFlat: List<GameObject> get() = getDirtyFlatList(objects)
 
     override lateinit var trashBlock: BehaviorSubject<Block?>; private set
     override lateinit var currentBlock: BehaviorSubject<Block?>; private set
     private var currentBlockProto: Block? = null
 
-    private fun genNextBlock() { synchronized(objectsLo) {
+    private fun genNextBlock() { /*synchronized(objectsLo) {*/
         currentBlockProto = BlockBuilder(config, blockTypeRepo)
             .withRandomTypeId(currentBlock.value?.typeId)
             .build()
@@ -62,7 +62,7 @@ class ClassicGameLooper : IGameLooper {
                 .withParam(GameObjectAnimation.PARAM_SPEED, 2.0f)
                 .withParam(GameObjectAnimation.PARAM_INTERPOLATOR, EaseOutInterpolator()))
             as Block)
-    } }
+    } /*}*/
 
     override fun init() {
         field.init()
@@ -71,17 +71,17 @@ class ClassicGameLooper : IGameLooper {
 
         genNextBlock()
 
-        field.withColumnTouchdownListener { index, location -> synchronized(objectsLo) {
+        field.withColumnTouchdownListener { index, location -> /*synchronized(objectsLo) {*/
             var nb = currentBlock.value
             if (nb == null || nb.isWaitForRemove || nb.isRemoved)
-                return@synchronized false
+                return@withColumnTouchdownListener /*@synchronized*/ false
 
             field.placeTo(currentBlockProto!!, index)
             trashBlock.onNext(nb.requestRemove() as Block)
             genNextBlock()
 
-            return@synchronized true
-        } }
+            return@withColumnTouchdownListener /*@synchronized*/ true
+        } /*}*/
     }
 
     override fun start() {

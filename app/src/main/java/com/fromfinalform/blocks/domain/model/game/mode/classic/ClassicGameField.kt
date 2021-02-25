@@ -22,6 +22,10 @@ import javax.inject.Inject
 
 class ClassicGameField : IGameField {
 
+    companion object {
+        const val TIMELINE_ACTION = 0L
+    }
+
     @Inject constructor()
     @Inject lateinit var config: IGameConfig
 
@@ -30,15 +34,16 @@ class ClassicGameField : IGameField {
     private val items = ArrayList<ArrayList<GameObject?>>()
     private val itemsLo = Any()
 
-    override val objects: List<GameObject> get() = synchronized(itemsLo) { items.flatten().filterNotNull() + background }
+    override val objects: List<GameObject> get() = /*synchronized(itemsLo) {*/ items.flatten().filterNotNull() + background /*}*/
 
     private fun buildMoveAnim(dstXY: PointF) = GameObjectAnimation(GameObjectAnimationTypeId.TRANSLATE)
+        .withParam(GameObjectAnimation.PARAM_TIMELINE_ID, TIMELINE_ACTION)
         .withParam(GameObjectAnimation.PARAM_DEST_XY, dstXY)
-        .withParam(GameObjectAnimation.PARAM_DELAY, 100L)
+        .withParam(GameObjectAnimation.PARAM_DELAY, 0L)
         .withParam(GameObjectAnimation.PARAM_SPEED, 0.004f)
         .withParam(GameObjectAnimation.PARAM_INTERPOLATOR, DecelerateInterpolator())
 
-    override fun init() { synchronized(itemsLo) {
+    override fun init() { /*synchronized(itemsLo) {*/
         background = GameObject().apply {
             width = config.fieldWidthPx
             height = config.fieldHeightPx
@@ -68,7 +73,7 @@ class ClassicGameField : IGameField {
         for (column in 0 until config.fieldWidthBl)
             items.add(arrayOfNulls<GameObject?>(config.fieldHeightBl).toCollection(ArrayList()))
 
-    } }
+    } /*}*/
 
     private var columnTouchdown: ((columnIndex: Int, columnXY: PointF) -> Boolean)?=null
     override fun withColumnTouchdownListener(handler: ((columnIndex: Int, columnXY: PointF) -> Boolean)?): ClassicGameField {
@@ -76,9 +81,9 @@ class ClassicGameField : IGameField {
         return this
     }
 
-    private fun tryGetHighlightObject(x: Float, y: Float): GameObject? { synchronized(itemsLo) {
+    private fun tryGetHighlightObject(x: Float, y: Float): GameObject? { /*synchronized(itemsLo) {*/
         return highlightItems.values.firstOrNull { x in it.x..(it.x + it.width) && y in it.y..(it.y + it.height) }
-    } }
+    } /*}*/
 
     private var highlightedColumn: GameObject? = null
     override fun onTouch(me: MotionEvent, sp: SceneParams): Boolean {
@@ -103,24 +108,21 @@ class ClassicGameField : IGameField {
         return false
     }
 
-    override fun clear() { synchronized(itemsLo) {
+    override fun clear() { /*synchronized(itemsLo) {*/
         items.flatten().forEach { it?.requestRemove() }
-    }}
+    }/*}*/
 
-    override fun onFrameDrawn(renderParams: RenderParams, sceneParams: SceneParams) { synchronized(itemsLo) {
+    override fun onFrameDrawn(renderParams: RenderParams, sceneParams: SceneParams) { /*synchronized(itemsLo) {*/
         items.forEach { it.removeTrash() }
-    } }
+    } /*}*/
 
     override fun canBePlaced(block: Block?, columnIndex: Int): Boolean { synchronized(itemsLo) {
-        if (columnIndex in 0 until config.fieldHeightBl) {
-            val r = findFirstAvailableRowInColumn(columnIndex)
-            if (r != -1)
-                return true
-        }
+        if (columnIndex in 0 until config.fieldHeightBl && items[columnIndex].last() == null)
+            return true
         return false
     } }
 
-    override fun placeTo(block: Block, columnIndex: Int) { synchronized(itemsLo) {
+    override fun placeTo(block: Block, columnIndex: Int) { /*synchronized(itemsLo) {*/
         val column = highlightItems[columnIndex]!!
         val rowIndex = findFirstAvailableRowInColumn(columnIndex)
 
@@ -129,37 +131,30 @@ class ClassicGameField : IGameField {
 
         block.withLocation(column.x, config.fieldHeightPx + config.blockGapVPx + 1)
             .disableMerge()
-            .requestAnimation(buildMoveAnim(calcItemLocation(columnIndex, rowIndex))
-                .withOnComplete {
-                    block.enableMerge()
-                    val b = getItemById(it) as? Block
-                    if (b != null)
-                        merge(b)
-                })
+            .requestAnimation(buildMoveAnim(calcItemLocation(columnIndex, rowIndex)))
+            .withOnAnimationQueueComplete { src, e ->
+                if (e.src.id == TIMELINE_ACTION) {
+                    src.enableMerge()
+                    merge(src as Block)
+
+                }
+                return@withOnAnimationQueueComplete false
+            }
+//                .withOnComplete {
+//                    block.enableMerge()
+//                    merge(block)
+////                    val b = getItemById(it) as? Block
+////                    if (b != null)
+////                        merge(b)
+//                })
 
         items[columnIndex][rowIndex] = block
         block.withOnRemoved {
             removeItemById(it.id)
-
-
-
-//            synchronized(itemsLo) {
-//            val indexInColumn = (block.tag as Point).y
-//            items[columnIndex].remove(block)
-//
-////            Log.d("mymy", "removed at: ${indexInColumn}")
-////            if (items[columnIndex].size > indexInColumn) {
-////                val itemsToShift = items[columnIndex].subList(indexInColumn, items[columnIndex].size)
-////                for (i in itemsToShift.indices) {
-////                    itemsToShift[i].requestAnimation(buildMoveAnim(calcItemLocation(columnIndex, indexInColumn + i)))
-////                }
-////            }
-//        }
-
         }
-    } }
+    } /*}*/
 
-    private fun findFirstAvailableRowInColumn(columnIndex: Int): Int { synchronized(itemsLo) {
+    private fun findFirstAvailableRowInColumn(columnIndex: Int): Int { /*synchronized(itemsLo) {*/
         val c = items[columnIndex]
         var ret = -1
         for (r in c.indices.reversed())
@@ -168,63 +163,52 @@ class ClassicGameField : IGameField {
             else
                 break
         return ret
-    } }
+    } /*}*/
 
     private fun calcItemLocation(column: Int, row: Int): PointF {
         val co = highlightItems[column]!!
         return PointF(co.x, co.y + row * (config.blockHeightPx + config.blockGapVPx))
     }
 
-    private fun getItemById(id: Long): GameObject? { synchronized(itemsLo) {
+    private fun getItemById(id: Long): GameObject? { /*synchronized(itemsLo) {*/
         return items.flatten().firstOrNull { it?.id == id }
-    } }
+    } /*}*/
 
-    private fun getItemByMesh(c: Int, r: Int): GameObject? { synchronized(itemsLo) {
-        if (c in 0 until items.size && r in 0 until items[c].size)
-            return items[c][r]
+    private fun getItemByCoordinate(coord: Pair<Int, Int>): Block? { /*synchronized(itemsLo) {*/
+        if (coord.first in 0 until config.fieldWidthBl && coord.second in 0 until config.fieldHeightBl)
+            return items[coord.first][coord.second] as? Block
         return null
-    } }
+    } /*}*/
 
-    private fun getItemMesh(id: Long): Pair<Int, Int>? { synchronized(itemsLo) {
+    private fun getItemCoordinate(id: Long): Pair<Int, Int>? { /*synchronized(itemsLo) {*/
         for (c in items.indices)
             for (r in items[c].indices)
                 if (items[c][r]?.id == id)
                     return Pair(c, r)
 
         return null
-    } }
+    } /*}*/
 
-    private fun removeItemById(id: Long) { synchronized(itemsLo) {
+    private fun removeItemById(id: Long) { /*synchronized(itemsLo) {*/
         for (c in items.indices)
             for (r in items[c].indices)
                 if (items[c][r]?.id == id)
                     items[c][r] = null
-    } }
+    } /*}*/
 
-    private fun getMergeCandidates(src: GameObject): List<GameObject> {
-        val cr = getItemMesh(src.id)
-        val ret = arrayListOf<GameObject>()
-
-        if (cr == null)
-            return ret
-
-        var go = getItemByMesh(cr.first, cr.second - 1)
-        if (go?.canMerge == true) ret.add(go)
-
-        go = getItemByMesh(cr.first + 1, cr.second)
-        if (go?.canMerge == true) ret.add(go)
-
-        go = getItemByMesh(cr.first, cr.second + 1)
-        if (go?.canMerge == true) ret.add(go)
-
-        go = getItemByMesh(cr.first - 1, cr.second)
-        if (go?.canMerge == true) ret.add(go)
-
-        return ret
+    private fun getMergeCandidates(src: Block): List<Block> {
+        val cr = getItemCoordinate(src.id) ?: return arrayListOf()
+        return arrayListOf(
+                Pair(cr.first, cr.second - 1),
+                Pair(cr.first + 1, cr.second),
+                Pair(cr.first, cr.second + 1),
+                Pair(cr.first - 1, cr.second))
+            .mapNotNull { getItemByCoordinate(it) }
+            .filter { it.canMerge && it.typeId == src.typeId }
     }
 
-    private fun merge(src: Block) { synchronized(itemsLo) {
-        val candidates = getMergeCandidates(src).filter { it is Block && it.typeId == src.typeId }
+    private fun merge(src: Block) { /*synchronized(itemsLo) {*/
+        val candidates = getMergeCandidates(src)
         if (candidates.isEmpty())
             return
 
@@ -237,5 +221,5 @@ class ClassicGameField : IGameField {
             src.requestRemove()
         })
         src.requestDraw()
-    } }
+    } /*}*/
 }
