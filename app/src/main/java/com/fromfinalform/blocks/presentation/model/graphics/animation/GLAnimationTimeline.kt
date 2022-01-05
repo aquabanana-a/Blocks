@@ -29,7 +29,7 @@ class GLAnimationTimeline(val id: Long) {
     }
 
     private fun onAnimationComplete(e: GLAnimationCompleteEvent) { synchronized(lo) {
-        if (animations.remove(e.src))
+        if (animations.remove(e.src) && animations.isEmpty())
             queueCompleteEvent.onNext(GLTimelineQueueCompleteEvent(this))
     } }
 }

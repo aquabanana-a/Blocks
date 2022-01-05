@@ -7,7 +7,9 @@ package com.fromfinalform.blocks.domain.model.game.mode.classic
 
 import android.graphics.PointF
 import android.view.MotionEvent
+import android.view.animation.AccelerateInterpolator
 import android.view.animation.DecelerateInterpolator
+import android.view.animation.Interpolator
 import com.fromfinalform.blocks.R
 import com.fromfinalform.blocks.domain.model.game.IGameField
 import com.fromfinalform.blocks.domain.model.game.`object`.GameObject
@@ -23,7 +25,8 @@ import javax.inject.Inject
 class ClassicGameField : IGameField {
 
     companion object {
-        const val TIMELINE_ACTION = 0L
+        const val TIMELINE_MOVE = 1L
+        const val TIMELINE_MERGE = 2L
     }
 
     @Inject constructor()
@@ -33,15 +36,20 @@ class ClassicGameField : IGameField {
     private val highlightItems = hashMapOf<Int/*column*/, GameObject>()
     private val items = ArrayList<ArrayList<GameObject?>>()
     private val itemsLo = Any()
+    private val mergeLo = Any()
+    private val itemsToRemove = arrayListOf<GameObject>()
+
+    private var waitedObjectsCount = 0
+    private val placementEnabled get() = waitedObjectsCount <= 0
 
     override val objects: List<GameObject> get() = /*synchronized(itemsLo) {*/ items.flatten().filterNotNull() + background /*}*/
 
-    private fun buildMoveAnim(dstXY: PointF) = GameObjectAnimation(GameObjectAnimationTypeId.TRANSLATE)
-        .withParam(GameObjectAnimation.PARAM_TIMELINE_ID, TIMELINE_ACTION)
+    private fun buildMoveAnim(dstXY: PointF, timeline: Long, interpolator: Interpolator = DecelerateInterpolator()) = GameObjectAnimation(GameObjectAnimationTypeId.TRANSLATE)
+        .withParam(GameObjectAnimation.PARAM_TIMELINE_ID, timeline)
         .withParam(GameObjectAnimation.PARAM_DEST_XY, dstXY)
         .withParam(GameObjectAnimation.PARAM_DELAY, 0L)
         .withParam(GameObjectAnimation.PARAM_SPEED, 0.004f)
-        .withParam(GameObjectAnimation.PARAM_INTERPOLATOR, DecelerateInterpolator())
+        .withParam(GameObjectAnimation.PARAM_INTERPOLATOR, interpolator)
 
     override fun init() { /*synchronized(itemsLo) {*/
         background = GameObject().apply {
@@ -117,7 +125,7 @@ class ClassicGameField : IGameField {
     } /*}*/
 
     override fun canBePlaced(block: Block?, columnIndex: Int): Boolean { synchronized(itemsLo) {
-        if (columnIndex in 0 until config.fieldHeightBl && items[columnIndex].last() == null)
+        if (placementEnabled && columnIndex in 0 until config.fieldHeightBl && items[columnIndex].last() == null)
             return true
         return false
     } }
@@ -129,29 +137,41 @@ class ClassicGameField : IGameField {
         if (rowIndex < 0)
             return
 
+        itemsToRemove.clear()
+        waitedObjectsCount = 1
         block.withLocation(column.x, config.fieldHeightPx + config.blockGapVPx + 1)
             .disableMerge()
-            .requestAnimation(buildMoveAnim(calcItemLocation(columnIndex, rowIndex)))
-            .withOnAnimationQueueComplete { src, e ->
-                if (e.src.id == TIMELINE_ACTION) {
+            .requestAnimation(buildMoveAnim(getItemLocation(columnIndex, rowIndex), TIMELINE_MOVE))
+            .withOnAnimationQueueComplete { src, e -> /*synchronized(mergeLo) {*/
+                if (e.src.id == TIMELINE_MOVE) {
                     src.enableMerge()
-                    merge(src as Block)
-
+                    waitedObjectsCount += merge(src as Block)
+                    waitedObjectsCount -= 1
                 }
                 return@withOnAnimationQueueComplete false
-            }
-//                .withOnComplete {
-//                    block.enableMerge()
-//                    merge(block)
-////                    val b = getItemById(it) as? Block
-////                    if (b != null)
-////                        merge(b)
-//                })
+            } /*}*/
 
-        items[columnIndex][rowIndex] = block
-        block.withOnRemoved {
-            removeItemById(it.id)
-        }
+        setItemCoordinate(Pair(columnIndex, rowIndex), block)
+        block.withOnRemoved { /*synchronized(mergeLo) {*/
+            val coord = getItemCoordinate(it.id)
+            val shiftObjects = removeItemById(it.id)
+
+            waitedObjectsCount += shiftObjects.count { so -> itemsToRemove.firstOrNull { it.id == so.id } == null }
+            waitedObjectsCount -= 1
+
+            if (coord == null)
+                return@withOnRemoved
+
+            shiftObjects.forEachIndexed { i, it ->
+                setItemCoordinate(getItemCoordinate(it.id), null)
+
+                val newCoord = Pair(coord.first, coord.second + i)
+                setItemCoordinate(newCoord, it as Block)
+
+                //it.disableMerge()
+                    it.requestAnimation(buildMoveAnim(getItemLocation(newCoord), TIMELINE_MOVE))
+            }
+        } /*}*/
     } /*}*/
 
     private fun findFirstAvailableRowInColumn(columnIndex: Int): Int { /*synchronized(itemsLo) {*/
@@ -165,7 +185,8 @@ class ClassicGameField : IGameField {
         return ret
     } /*}*/
 
-    private fun calcItemLocation(column: Int, row: Int): PointF {
+    private fun getItemLocation(coord: Pair<Int, Int>) = getItemLocation(coord.first, coord.second)
+    private fun getItemLocation(column: Int, row: Int): PointF {
         val co = highlightItems[column]!!
         return PointF(co.x, co.y + row * (config.blockHeightPx + config.blockGapVPx))
     }
@@ -173,6 +194,12 @@ class ClassicGameField : IGameField {
     private fun getItemById(id: Long): GameObject? { /*synchronized(itemsLo) {*/
         return items.flatten().firstOrNull { it?.id == id }
     } /*}*/
+
+    private fun setItemCoordinate(coord: Pair<Int, Int>?, item: Block?) {
+        if (coord == null)
+            return
+        items[coord.first][coord.second] = item
+    }
 
     private fun getItemByCoordinate(coord: Pair<Int, Int>): Block? { /*synchronized(itemsLo) {*/
         if (coord.first in 0 until config.fieldWidthBl && coord.second in 0 until config.fieldHeightBl)
@@ -189,11 +216,23 @@ class ClassicGameField : IGameField {
         return null
     } /*}*/
 
-    private fun removeItemById(id: Long) { /*synchronized(itemsLo) {*/
-        for (c in items.indices)
-            for (r in items[c].indices)
-                if (items[c][r]?.id == id)
+    private fun removeItemById(id: Long): List<GameObject> { /*synchronized(itemsLo) {*/
+        val ret = arrayListOf<GameObject>()
+        var found = false
+        for (c in items.indices) {
+            for (r in items[c].indices) {
+                if (items[c][r]?.id == id) {
                     items[c][r] = null
+                    found = true
+                }
+                else if (found && items[c][r] != null) {
+                    ret.add(items[c][r]!!)
+                }
+            }
+            if (found)
+                break
+        }
+        return ret
     } /*}*/
 
     private fun getMergeCandidates(src: Block): List<Block> {
@@ -204,22 +243,27 @@ class ClassicGameField : IGameField {
                 Pair(cr.first, cr.second + 1),
                 Pair(cr.first - 1, cr.second))
             .mapNotNull { getItemByCoordinate(it) }
-            .filter { it.canMerge && it.typeId == src.typeId }
+            .filter { it.canMerge && it.typeId == src.typeId && it.id != src.id }
     }
 
-    private fun merge(src: Block) { /*synchronized(itemsLo) {*/
+    private fun merge(src: Block): Int { /*synchronized(itemsLo) {*/
         val candidates = getMergeCandidates(src)
-        if (candidates.isEmpty())
-            return
+        //if (candidates.isEmpty())
+            return 0
 
-        val dst = candidates.first()
         src.disableMerge()
-        dst.disableMerge()
+        itemsToRemove.add(src)
 
-        src.requestAnimation(buildMoveAnim(dst.location).withOnComplete {
-            dst.requestRemove()
-            src.requestRemove()
-        })
-        src.requestDraw()
+        candidates.forEach {
+            it.disableMerge()
+            itemsToRemove.add(it)
+
+            it.withOnAnimationQueueComplete(null)
+            it.requestAnimation(buildMoveAnim(src.location, TIMELINE_MOVE, AccelerateInterpolator()).withOnComplete {
+                src.requestRemove()
+            })
+        }
+
+        return candidates.size
     } /*}*/
 }

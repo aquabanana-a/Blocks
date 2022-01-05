@@ -48,6 +48,7 @@ open class GameObject(val id: Long = GameObjectIndexer.getNext()) : ICloneable<G
 
     var drawedHandler: ((GameObject)->Unit)? = null
     var removedHandler: ((GameObject)->Unit)? = null
+
     var animationQueueCompleteHandler: ((GameObject, GLTimelineQueueCompleteEvent) -> Boolean)? = null
 
     var isWaitForAnimate = false; private set
@@ -55,21 +56,21 @@ open class GameObject(val id: Long = GameObjectIndexer.getNext()) : ICloneable<G
     var isRemoved = false; private set
     var isDirty = true; private set
 
-    private var canMergeImpl = AtomicBoolean(false)
-    val canMerge get() = canMergeImpl.get()
-//    var canMerge = false
+//    private var canMergeImpl = AtomicBoolean(false)
+//    val canMerge get() = canMergeImpl.get()
+    var canMerge = false
 
     private val lo = Any()
 
     fun enableMerge(): GameObject {
-        this.canMergeImpl.set(true)
-//        this.canMerge = true
+//        this.canMergeImpl.set(true)
+        this.canMerge = true
         return this
     }
 
     fun disableMerge(): GameObject {
-        this.canMergeImpl.set(false)
-//        this.canMerge = false
+//        this.canMergeImpl.set(false)
+        this.canMerge = false
         return this
     }
 

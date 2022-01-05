@@ -101,8 +101,8 @@ class GraphicsMapper {
                 }
 
                 if (src.animationQueueCompleteHandler != null) {
-                    glTimeline?.withOnQueueComplete { e ->
-                        return@withOnQueueComplete src.animationQueueCompleteHandler!!.invoke(src, e)
+                    glTimeline!!.withOnQueueComplete { e ->
+                        return@withOnQueueComplete src.animationQueueCompleteHandler?.invoke(src, e) ?: true
                     }
                 }
 
