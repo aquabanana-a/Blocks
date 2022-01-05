@@ -1,8 +1,3 @@
-/*
- * Created by S.Dobranos on 16.02.21 21:15
- * Copyright (c) 2021. All rights reserved.
- */
-
 package com.fromfinalform.blocks.domain.model.game.mode.classic
 
 import com.fromfinalform.blocks.domain.model.game.configuration.IGameConfig

@@ -1,8 +1,3 @@
-/*
- * Created by S.Dobranos on 08.02.21 20:35
- * Copyright (c) 2021. All rights reserved.
- */
-
 package com.fromfinalform.blocks.presentation.model.graphics.text.resolver
 
 import com.fromfinalform.blocks.presentation.model.graphics.renderer.data.GLColor

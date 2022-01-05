@@ -1,8 +1,3 @@
-/*
- * Created by S.Dobranos on 08.02.21 20:35
- * Copyright (c) 2021. All rights reserved.
- */
-
 package com.fromfinalform.blocks.presentation.model.graphics.text.resolver
 
 data class GLTextIndex(var row: Int = 0, var word: Int = 0, var glyph: Int = 0, var glyphRow: Int = 0, var wordAbsolute: Int = 0, var glyphAbsolute: Int = 0) {

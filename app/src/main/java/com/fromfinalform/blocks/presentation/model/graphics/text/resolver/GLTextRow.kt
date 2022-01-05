@@ -1,8 +1,3 @@
-/*
- * Created by S.Dobranos on 08.02.21 20:35
- * Copyright (c) 2021. All rights reserved.
- */
-
 package com.fromfinalform.blocks.presentation.model.graphics.text.resolver
 
 data class GLTextRow(val words: List<GLTextWord>, val width: Float, val height: Float? = null, val x: Float?=null, val y: Float?=null, val baseLine: Float?=null,

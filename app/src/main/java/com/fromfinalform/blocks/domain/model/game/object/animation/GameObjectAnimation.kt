@@ -1,8 +1,3 @@
-/*
- * Created by S.Dobranos on 19.02.21 14:23
- * Copyright (c) 2021. All rights reserved.
- */
-
 package com.fromfinalform.blocks.domain.model.game.`object`.animation
 
 import android.graphics.PointF

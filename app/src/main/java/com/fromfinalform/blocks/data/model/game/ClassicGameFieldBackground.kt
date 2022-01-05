@@ -1,8 +1,3 @@
-/*
- * Created by S.Dobranos on 07.02.21 21:31
- * Copyright (c) 2021. All rights reserved.
- */
-
 package com.fromfinalform.blocks.data.model.game
 
 import com.fromfinalform.blocks.R

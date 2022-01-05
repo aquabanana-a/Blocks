@@ -1,8 +1,3 @@
-/*
- * Created by S.Dobranos on 08.02.21 1:53
- * Copyright (c) 2021. All rights reserved.
- */
-
 package com.fromfinalform.blocks.domain.model.game.`object`.block
 
 import com.fromfinalform.blocks.domain.model.game.`object`.GameObject

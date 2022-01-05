@@ -1,8 +1,3 @@
-/*
- * Created by S.Dobranos on 11.02.21 21:56
- * Copyright (c) 2021. All rights reserved.
- */
-
 package com.fromfinalform.blocks.presentation.model.graphics.renderer.unit
 
 import android.graphics.PointF

@@ -1,8 +1,3 @@
-/*
- * Created by S.Dobranos on 08.02.21 2:12
- * Copyright (c) 2021. All rights reserved.
- */
-
 package com.fromfinalform.blocks.domain.interactor
 
 import android.view.Gravity

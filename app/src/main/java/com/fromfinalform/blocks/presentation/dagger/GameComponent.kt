@@ -1,8 +1,3 @@
-/*
- * Created by S.Dobranos on 16.02.21 21:11
- * Copyright (c) 2021. All rights reserved.
- */
-
 package com.fromfinalform.blocks.presentation.dagger
 
 import com.fromfinalform.blocks.domain.model.game.IGameField

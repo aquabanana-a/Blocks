@@ -1,8 +1,3 @@
-/*
- * Created by S.Dobranos on 25.02.21 12:14
- * Copyright (c) 2021. All rights reserved.
- */
-
 package com.fromfinalform.blocks.presentation.model.graphics.animation
 
 import com.fromfinalform.blocks.presentation.model.graphics.animation.event.GLAnimationCompleteEvent

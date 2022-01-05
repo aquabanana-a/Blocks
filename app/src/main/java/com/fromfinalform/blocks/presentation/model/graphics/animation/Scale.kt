@@ -1,8 +1,3 @@
-/*
- * Created by S.Dobranos on 15.02.21 19:52
- * Copyright (c) 2021. All rights reserved.
- */
-
 package com.fromfinalform.blocks.presentation.model.graphics.animation
 
 import android.view.animation.Interpolator
