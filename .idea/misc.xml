@@ -3,7 +3,12 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
+        <entry key="..\:/!work/Android/FinalForm/blocks/app/src/main/res/layout/activity_app.xml" value="0.25885416666666666" />
+        <entry key="..\:/!work/Android/FinalForm/blocks/app/src/main/res/layout/activity_main.xml" value="0.21025641025641026" />
         <entry key="..\:/!work/Android/FinalForm/blocks/app/src/main/res/layout/fragment_game.xml" value="0.2111111111111111" />
+        <entry key="..\:/!work/Android/FinalForm/blocks/app/src/main/res/layout/fragment_home.xml" value="0.2869791666666667" />
+        <entry key="..\:/!work/Android/FinalForm/blocks/app/src/main/res/layout/fragment_score.xml" value="0.21025641025641026" />
+        <entry key="..\:/!work/Android/FinalForm/blocks/app/src/main/res/menu/navigation_menu_bottom.xml" value="0.25885416666666666" />
       </map>
     </option>
   </component>

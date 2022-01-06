@@ -5,7 +5,7 @@ import com.fromfinalform.blocks.domain.model.game.IGameLooper
 import com.fromfinalform.blocks.domain.model.game.configuration.IGameConfig
 import com.fromfinalform.blocks.presentation.dagger.module.ClassicBlockModule
 import com.fromfinalform.blocks.presentation.dagger.module.ClassicGameModule
-import com.fromfinalform.blocks.presentation.presenter.GamePresenter
+import com.fromfinalform.blocks.presentation.view.game.GameViewModel
 import dagger.Component
 import javax.inject.Singleton
 
@@ -16,5 +16,5 @@ interface GameComponent {
     fun getField(): IGameField
     fun getLooper(): IGameLooper
 
-    fun injectGamePresenter(presenter: GamePresenter)
+    fun injectGamePresenter(presenter: GameViewModel)
 }

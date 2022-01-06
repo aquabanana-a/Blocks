@@ -12,10 +12,13 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.Blocks"
-        android:name=".presentation.view.App">
+        android:name=".app.App">
 
+        <!--android:screenOrientation="portrait"-->
         <activity
-            android:name=".presentation.view.MainActivity"
+            android:name=".app.AppActivity"
+            android:launchMode="singleTask"
+            android:exported="true"
             android:configChanges="orientation|screenSize|screenLayout">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

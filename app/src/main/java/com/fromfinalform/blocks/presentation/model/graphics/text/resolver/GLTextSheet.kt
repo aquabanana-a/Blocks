@@ -36,7 +36,7 @@ data class GLTextSheet(val rows: List<GLTextRow> = arrayListOf(), val glyphWidth
         totalGlyphCount = rows.sumBy { it.getTotalGlyphCount() }
         cleanWordCount = rows.sumBy { it.getCleanWords().size }
         totalWordCount = rows.sumBy { it.words.size }
-        width = rows.maxBy { it.width }?.width ?: 0.0f
+        width = rows.maxByOrNull { it.width }?.width ?: 0.0f
         height = rows.size * rowHeight
         return this
     }
@@ -57,7 +57,7 @@ data class GLTextSheet(val rows: List<GLTextRow> = arrayListOf(), val glyphWidth
         return ret
     }
 
-    fun getMaxWidthRow(): GLTextRow = rows.maxBy { it.width } ?: GLTextRow(arrayListOf(), 0.0f)
+    fun getMaxWidthRow(): GLTextRow = rows.maxByOrNull { it.width } ?: GLTextRow(arrayListOf(), 0.0f)
     operator fun get(index: Int) = rows[index]
 
     fun clone(): GLTextSheet {

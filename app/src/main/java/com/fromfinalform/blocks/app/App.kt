@@ -1,8 +1,10 @@
-package com.fromfinalform.blocks.presentation.view
+package com.fromfinalform.blocks.app
 
 import android.app.Application
 import android.content.Context
 import android.content.res.Resources
+import com.fromfinalform.blocks.core.locale.LocaleUtils
+import timber.log.Timber
 
 class App : Application() {
 
@@ -17,5 +19,13 @@ class App : Application() {
         super.onCreate()
 
         appContext = applicationContext
+
+        initDagger()
+
+        LocaleUtils.initLocale(this, "ru")
+    }
+
+    private fun initDagger() {
+
     }
 }

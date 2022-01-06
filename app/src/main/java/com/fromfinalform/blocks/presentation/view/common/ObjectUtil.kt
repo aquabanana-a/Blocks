@@ -1,6 +1,6 @@
 package com.fromfinalform.blocks.presentation.view.common
 
-import com.fromfinalform.blocks.presentation.view.App.Companion.getResources
+import com.fromfinalform.blocks.app.App.Companion.getResources
 
 const val FORMAT_UNIFORM_COMMON_USE = true
 const val FORMAT_UNIFORM_SYMBOL = "[p]"

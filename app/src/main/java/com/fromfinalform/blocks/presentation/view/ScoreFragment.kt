@@ -4,21 +4,20 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.fragment.app.Fragment
 import com.fromfinalform.blocks.R
-import com.fromfinalform.blocks.presentation.presenter.ScorePresenter
-import moxy.MvpAppCompatFragment
-import moxy.presenter.InjectPresenter
 
-class ScoreFragment : MvpAppCompatFragment(), ScorePresenter.ScoreView {
+class ScoreFragment : Fragment() {
 
-    lateinit var vRoot: View
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+    }
 
-    @InjectPresenter
-    lateinit var presenter: ScorePresenter
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+        return inflater.inflate(R.layout.fragment_score, container, false)
+    }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
-        vRoot = inflater.inflate(R.layout.fragment_score, container, false)
-
-        return vRoot
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
     }
 }

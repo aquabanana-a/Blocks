@@ -2,7 +2,6 @@ package com.fromfinalform.blocks.presentation.model.graphics.renderer
 
 import android.opengl.GLES20.glViewport
 import android.util.Log
-import com.fromfinalform.blocks.presentation.model.graphics.drawer.IShaderDrawerRepository
 import com.fromfinalform.blocks.presentation.model.graphics.opengl.common.GLUtils
 import com.fromfinalform.blocks.presentation.model.graphics.renderer.data.GLColor
 import com.fromfinalform.blocks.presentation.model.graphics.renderer.unit.IRenderItem
@@ -12,16 +11,13 @@ import com.fromfinalform.blocks.presentation.model.graphics.renderer.unit.Render
 import com.fromfinalform.blocks.presentation.model.repository.ShaderDrawerRepository
 import com.fromfinalform.blocks.presentation.model.repository.TextTextureRepository
 import com.fromfinalform.blocks.presentation.model.repository.TextureRepository
-import com.fromfinalform.blocks.presentation.view.App
+import com.fromfinalform.blocks.app.App
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.asCoroutineDispatcher
-import java.util.concurrent.Executors
 import javax.microedition.khronos.egl.EGLConfig
 import javax.microedition.khronos.opengles.GL10
 import kotlin.math.max
-import kotlin.math.min
 
 class ViewRenderer(clearColor: Long, override var sceneSize: ISize) : IRenderer {
 
