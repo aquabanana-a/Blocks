@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<lint>
+    <issue id="MissingSuperCall" severity="warning" />
+    <issue id="Deprecated" severity="warning" />
+    <issue id="HardcodedText" severity="warning" />
+    <issue id="IconDuplicates" severity="warning" />
+    <issue id="DisableBaselineAlignment" severity="warning" />
+    <issue id="LogConditional" severity="warning" />
+    <issue id="MissingPermission" severity="warning" />
+    <issue id="TooDeepLayout" severity="warning" />
+    <issue id="UnusedIds" severity="warning" />
+
+    <issue id="VectorPath" severity="error" />
+    <issue id="VectorRaster" severity="error" />
+    <issue id="DrawAllocation" severity="error" />
+
+    <issue id="GradleDependency" severity="ignore" />
+    <issue id="OldTargetApi" severity="ignore" />
+    <issue id="LongLogTag" severity="ignore" />
+
+    <issue id="ContentDescription" severity="ignore" />
+    <issue id="SmallSp" severity="ignore" />
+    <issue id="IconMissingDensityFolder" severity="ignore" />
+
+    <issue id="MissingTranslation" severity="ignore" />
+
+    <issue id="RtlHardcoded" severity="ignore" />
+    <issue id="RtlEnabled" severity="ignore" />
+    <issue id="ExtraTranslation" severity="ignore" />
+    <issue id="ImpliedQuantity" severity="ignore" />
+    <issue id="ByteOrderMark" severity="ignore" />
+
+    <!-- don't check legacy code-->
+    <issue id="all">
+        <ignore path="**/*.java" />
+    </issue>
+</lint>

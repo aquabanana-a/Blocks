@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@id/graph_global"
+    app:startDestination="@id/screen_gameFragment">
+
+    <fragment
+        android:id="@id/screen_homeFragment"
+        android:name="com.fromfinalform.blocks.home.HomeFragment"
+        android:label="HomeFragment">
+        <action
+            android:id="@id/action_homeFragment_to_gameFragment"
+            app:destination="@id/screen_gameFragment"
+            app:popUpTo="@id/graph_global" />
+    </fragment>
+
+    <fragment
+        android:id="@id/screen_gameFragment"
+        android:name="com.fromfinalform.blocks.presentation.view.game.GameFragment"
+        android:label="GameFragment">
+        <action
+            android:id="@id/action_gameFragment_to_scoreFragment"
+            app:destination="@id/screen_scoreFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@id/screen_scoreFragment"
+        android:name="com.fromfinalform.blocks.presentation.view.ScoreFragment"
+        android:label="ScoreFragment"/>
+
+</navigation>

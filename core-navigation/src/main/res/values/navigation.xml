@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <item name="host_global" type="id" />
+
+    <item name="graph_global" type="id" />
+
+    <item name="screen_homeFragment" type="id" />
+    <item name="screen_gameFragment" type="id" />
+    <item name="screen_scoreFragment" type="id" />
+
+    <item name="action_homeFragment_to_gameFragment" type="id" />
+    <item name="action_gameFragment_to_scoreFragment" type="id" />
+</resources>

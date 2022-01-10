@@ -1,0 +1,42 @@
+{
+  "project_info": {
+    "project_number": "477212548449",
+    "firebase_url": "https://particle-one.firebaseio.com",
+    "project_id": "particle-one",
+    "storage_bucket": "particle-one.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:477212548449:android:b6f68aaec457a9ea",
+        "android_client_info": {
+          "package_name": "com.fromfinalform.blocks.debug"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "477212548449-ufmucvti05ptc2acfmtltc9djonhdiae.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDLuFXqy0InfhtpsbEmPo0LpcjqpwNDfEA"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
